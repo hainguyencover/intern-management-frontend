@@ -31,16 +31,20 @@ export default function Sidebar() {
             {label: "Roles & Permissions", to: "/admin/roles"},
         ];
         const hr = [
-            {label: "Interns", to: "/hr/interns"},
-            {label: "Documents (HR)", to: "/hr/documents"},
+            { label: "Interns", to: "/hr/interns" },
+            { label: "Documents (HR)", to: "/hr/documents" },
+            { label: "Programs", to: "/hr/programs" },
+            { label: "Groups", to: "/hr/groups" },
+
         ];
         const mentor = [
             {label: "Assigned Interns", to: "/mentor/interns"},
             {label: "Reviews", to: "/mentor/reviews"},
         ];
         const intern = [
-            {label: "My Documents", to: "/intern/documents"},
-            {label: "Tasks", to: "/intern/tasks"},
+            { label: "My Documents", to: "/intern/documents" },
+            { label: "Tasks", to: "/intern/tasks" },
+            { label: "My Schedule", to: "/interns/me/schedule" },
         ];
 
         return [

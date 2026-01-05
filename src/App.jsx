@@ -20,6 +20,12 @@ import HrDocumentsPage from "./pages/documents/HrDocumentsPage";
 import InternDocumentsPage from "./pages/documents/InternDocumentsPage";
 import { Toaster } from "sonner";
 
+import Programs from "./pages/hr/Programs";
+import MySchedule from "./pages/interns/MySchedule";
+
+import Groups from "./pages/hr/Groups";
+
+
 function Unauthorized() {
   return (
     <div style={{ padding: 24 }}>
@@ -66,15 +72,19 @@ function AppContent() {
               <Route path="/dashboard/admin" element={<AdminDashboard />} />
             </Route>
 
-            <Route element={<ProtectedRoute allowRoles={["HR", "ADMIN"]} />}>
-              <Route path="/dashboard/hr" element={<HrDashboard />} />
-              <Route path="/hr/interns" element={<InternList />} />
-              <Route path="/hr/interns/new" element={<CreateIntern />} />
-              <Route path="/hr/interns/:id/edit" element={<EditIntern />} />
-              <Route path="/hr/interns/:internId" element={<InternDetail />} />
-              {/* HR document viewer (choose intern inside the page) */}
-              <Route path="/hr/documents" element={<HrDocumentsPage />} />
-            </Route>
+                        <Route element={<ProtectedRoute allowRoles={["HR", "ADMIN"]}/> }>
+                            <Route path="/dashboard/hr" element={<HrDashboard/>}/>
+                            <Route path="/hr/interns" element={<InternList/>}/>
+                            <Route path="/hr/interns/new" element={<CreateIntern/>}/>
+                            <Route path="/hr/interns/:id/edit" element={<EditIntern/>}/>
+                            <Route path="/hr/interns/:internId" element={<InternDetail/>}/>
+                            {/* HR document viewer (choose intern inside the page) */}
+                            <Route path="/hr/documents" element={<HrDocumentsPage/>} />
+
+                            <Route path="/hr/programs" element={<Programs />} />
+                            <Route path="/hr/groups" element={<Groups />} />
+
+                        </Route>
 
             <Route
               element={<ProtectedRoute allowRoles={["MENTOR", "ADMIN"]} />}
@@ -82,17 +92,15 @@ function AppContent() {
               <Route path="/dashboard/mentor" element={<MentorDashboard />} />
             </Route>
 
-            <Route
-              element={<ProtectedRoute allowRoles={["INTERN", "ADMIN"]} />}
-            >
-              <Route path="/dashboard/intern" element={<InternDashboard />} />
-              <Route
-                path="/intern/documents"
-                element={<InternDocumentsPage />}
-              />
-            </Route>
-          </Route>
-        </Route>
+                        <Route element={<ProtectedRoute allowRoles={["INTERN", "ADMIN"]}/> }>
+                            <Route path="/dashboard/intern" element={<InternDashboard/>}/>
+                            <Route path="/intern/documents" element={<InternDocumentsPage/>} />
+
+                            <Route path="/interns/me/schedule" element={<MySchedule />} />
+
+                        </Route>
+                    </Route>
+                </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
