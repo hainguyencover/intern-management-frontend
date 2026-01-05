@@ -100,7 +100,8 @@ export default function HrInternDocuments({internId, hrUserId}) {
 
             const a = document.createElement("a");
             a.href = url;
-            a.download = `${doc.type || "document"}-${doc.id}`;
+            const ext = (res.headers?.["content-type"] || "").includes("pdf") ? ".pdf" : "";
+            a.download = `${doc.type || "document"}-${doc.id}${ext}`;
             document.body.appendChild(a);
             a.click();
             a.remove();
