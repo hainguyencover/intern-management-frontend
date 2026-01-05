@@ -19,6 +19,12 @@ import HrDocumentsPage from "./pages/documents/HrDocumentsPage";
 import InternDocumentsPage from "./pages/documents/InternDocumentsPage";
 import {Toaster} from "sonner";
 
+import Programs from "./pages/hr/Programs";
+import MySchedule from "./pages/interns/MySchedule";
+
+import Groups from "./pages/hr/Groups";
+
+
 function Unauthorized() {
     return (
         <div style={{padding: 24}}>
@@ -69,6 +75,10 @@ function AppContent() {
                             <Route path="/hr/interns/:internId" element={<InternDetail/>}/>
                             {/* HR document viewer (choose intern inside the page) */}
                             <Route path="/hr/documents" element={<HrDocumentsPage/>} />
+
+                            <Route path="/hr/programs" element={<Programs />} />
+                            <Route path="/hr/groups" element={<Groups />} />
+
                         </Route>
 
                         <Route element={<ProtectedRoute allowRoles={["MENTOR", "ADMIN"]}/> }>
@@ -78,6 +88,9 @@ function AppContent() {
                         <Route element={<ProtectedRoute allowRoles={["INTERN", "ADMIN"]}/> }>
                             <Route path="/dashboard/intern" element={<InternDashboard/>}/>
                             <Route path="/intern/documents" element={<InternDocumentsPage/>} />
+
+                            <Route path="/interns/me/schedule" element={<MySchedule />} />
+
                         </Route>
                     </Route>
                 </Route>
