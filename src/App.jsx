@@ -1,9 +1,10 @@
 import React from "react";
-import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import {AuthProvider, useAuth} from "./auth/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import "./index.css";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import MainLayout from "./layouts/MainLayout";
 
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
@@ -17,82 +18,93 @@ import InternDetail from "./pages/hr/InternDetail.jsx";
 import MyProfile from "./pages/interns/MyProfile";
 import HrDocumentsPage from "./pages/documents/HrDocumentsPage";
 import InternDocumentsPage from "./pages/documents/InternDocumentsPage";
-import {Toaster} from "sonner";
+import { Toaster } from "sonner";
 
 function Unauthorized() {
-    return (
-        <div style={{padding: 24}}>
-            <h2>Unauthorized</h2>
-            <p>You don’t have permission to access this page.</p>
-        </div>
-    );
+  return (
+    <div style={{ padding: 24 }}>
+      <h2>Unauthorized</h2>
+      <p>You don’t have permission to access this page.</p>
+    </div>
+  );
 }
 
 function AppContent() {
-    const { user } = useAuth();
-    const roles = user?.roles || [];
+  const { user } = useAuth();
+  const roles = user?.roles || [];
 
-    // Determine default dashboard based on user's primary role
-    const getDefaultDashboard = () => {
-        if (roles.includes("ADMIN")) return "/dashboard/admin";
-        if (roles.includes("HR")) return "/dashboard/hr";
-        if (roles.includes("MENTOR")) return "/dashboard/mentor";
-        return "/dashboard/intern";
-    };
+  // Determine default dashboard based on user's primary role
+  const getDefaultDashboard = () => {
+    if (roles.includes("ADMIN")) return "/dashboard/admin";
+    if (roles.includes("HR")) return "/dashboard/hr";
+    if (roles.includes("MENTOR")) return "/dashboard/mentor";
+    return "/dashboard/intern";
+  };
 
-    const defaultDashboard = getDefaultDashboard();
+  const defaultDashboard = getDefaultDashboard();
 
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/login" element={<Login/>}/>
-                <Route path="/unauthorized" element={<Unauthorized/>}/>
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
-                {/* Protected area */}
-                <Route element={<ProtectedRoute/>}>
-                    <Route element={<MainLayout/>}>
-                        <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
-                        <Route path="/dashboard" element={<Navigate to={defaultDashboard} replace/>}/>
+        {/* Protected area */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="/dashboard"
+              element={<Navigate to={defaultDashboard} replace />}
+            />
 
-                        {/* profile accessible to any authenticated user */}
-                        <Route path="/profile" element={<MyProfile/>} />
+            {/* profile accessible to any authenticated user */}
+            <Route path="/profile" element={<MyProfile />} />
 
-                        <Route element={<ProtectedRoute allowRoles={["ADMIN"]}/> }>
-                            <Route path="/dashboard/admin" element={<AdminDashboard/>}/>
-                        </Route>
+            <Route element={<ProtectedRoute allowRoles={["ADMIN"]} />}>
+              <Route path="/dashboard/admin" element={<AdminDashboard />} />
+            </Route>
 
-                        <Route element={<ProtectedRoute allowRoles={["HR", "ADMIN"]}/> }>
-                            <Route path="/dashboard/hr" element={<HrDashboard/>}/>
-                            <Route path="/hr/interns" element={<InternList/>}/>
-                            <Route path="/hr/interns/new" element={<CreateIntern/>}/>
-                            <Route path="/hr/interns/:id/edit" element={<EditIntern/>}/>
-                            <Route path="/hr/interns/:internId" element={<InternDetail/>}/>
-                            {/* HR document viewer (choose intern inside the page) */}
-                            <Route path="/hr/documents" element={<HrDocumentsPage/>} />
-                        </Route>
+            <Route element={<ProtectedRoute allowRoles={["HR", "ADMIN"]} />}>
+              <Route path="/dashboard/hr" element={<HrDashboard />} />
+              <Route path="/hr/interns" element={<InternList />} />
+              <Route path="/hr/interns/new" element={<CreateIntern />} />
+              <Route path="/hr/interns/:id/edit" element={<EditIntern />} />
+              <Route path="/hr/interns/:internId" element={<InternDetail />} />
+              {/* HR document viewer (choose intern inside the page) */}
+              <Route path="/hr/documents" element={<HrDocumentsPage />} />
+            </Route>
 
-                        <Route element={<ProtectedRoute allowRoles={["MENTOR", "ADMIN"]}/> }>
-                            <Route path="/dashboard/mentor" element={<MentorDashboard/>}/>
-                        </Route>
+            <Route
+              element={<ProtectedRoute allowRoles={["MENTOR", "ADMIN"]} />}
+            >
+              <Route path="/dashboard/mentor" element={<MentorDashboard />} />
+            </Route>
 
-                        <Route element={<ProtectedRoute allowRoles={["INTERN", "ADMIN"]}/> }>
-                            <Route path="/dashboard/intern" element={<InternDashboard/>}/>
-                            <Route path="/intern/documents" element={<InternDocumentsPage/>} />
-                        </Route>
-                    </Route>
-                </Route>
+            <Route
+              element={<ProtectedRoute allowRoles={["INTERN", "ADMIN"]} />}
+            >
+              <Route path="/dashboard/intern" element={<InternDashboard />} />
+              <Route
+                path="/intern/documents"
+                element={<InternDocumentsPage />}
+              />
+            </Route>
+          </Route>
+        </Route>
 
-                <Route path="*" element={<Navigate to="/login" replace/>}/>
-            </Routes>
-            <Toaster richColors position="top-right"/>
-        </BrowserRouter>
-    );
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+      <Toaster richColors position="top-right" />
+    </BrowserRouter>
+  );
 }
 
 export default function App() {
-    return (
-        <AuthProvider>
-            <AppContent />
-        </AuthProvider>
-    );
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }

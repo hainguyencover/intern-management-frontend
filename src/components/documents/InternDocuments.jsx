@@ -75,7 +75,7 @@ export default function InternDocuments({internId}) {
         setUploadingType(type);
         try {
             // Call API without internId; backend infers user from token
-            await internDocumentApi.uploadDocument({ type, file });
+            await internDocumentApi.uploadDocument({type, file});
             toast.success("Upload tài liệu thành công.");
             await load();
         } catch (e) {
@@ -96,31 +96,33 @@ export default function InternDocuments({internId}) {
         try {
             const res = await internDocumentApi.downloadDocument({
                 id: doc.id,
-                requesterUserId: user?.id,
+                requesterUserId: user?.id,   // hoặc bỏ luôn nếu BE không cần
                 isHr: false,
             });
 
-            const blob = new Blob([res.data], {type: res.headers["content-type"] || "application/octet-stream"});
-            const url = window.URL.createObjectURL(blob);
+            // lấy filename từ header (nếu backend có) hoặc fallback
+            const contentDisposition = res.headers?.["content-disposition"] || "";
+            const match = /filename="(.+?)"/i.exec(contentDisposition);
+            const filename = match?.[1] || `${doc.type || "document"}-${doc.id}.pdf`;
 
+            const blob = new Blob([res.data], {
+                type: res.headers?.["content-type"] || "application/pdf",
+            });
+
+            const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `${doc.type || "document"}-${doc.id}`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
         } catch (e) {
             const backendMsg = e?.backendMessage || e?.message || "";
-            if (e && e.code === "UNAUTHORIZED") {
-                toast.error(backendMsg || "Bạn chưa được xác thực. Vui lòng đăng nhập lại.");
-            } else if (e && e.code === "PROFILE_NOT_FOUND") {
-                toast.error(backendMsg || "Không tìm thấy profile thực tập sinh. Vui lòng liên hệ admin.");
-            } else {
-                toast.error(backendMsg || "Tải file thất bại.");
-            }
+            toast.error(backendMsg || "Tải file thất bại.");
         }
     };
+
 
     const Card = ({type}) => {
         const d = byType.get(type);
@@ -200,7 +202,8 @@ export default function InternDocuments({internId}) {
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-1">
                 <h2 className="text-lg font-bold text-slate-900">Tài liệu hồ sơ</h2>
-                <p className="text-sm text-slate-600">Upload CV và đơn xin thực tập dưới dạng PDF để hoàn thiện hồ sơ. HR sẽ download tài liệu dưới dạng PDF.</p>
+                <p className="text-sm text-slate-600">Upload CV và đơn xin thực tập dưới dạng PDF để hoàn thiện hồ sơ.
+                    HR sẽ download tài liệu dưới dạng PDF.</p>
             </div>
 
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
