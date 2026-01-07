@@ -35,6 +35,7 @@ export default function Sidebar() {
             { label: "Documents (HR)", to: "/hr/documents" },
             { label: "Programs", to: "/hr/programs" },
             { label: "Groups", to: "/hr/groups" },
+            { label: "Mentors", to: "/hr/mentors" },
 
         ];
         const mentor = [
