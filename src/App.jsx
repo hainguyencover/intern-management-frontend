@@ -26,6 +26,12 @@ import ApplicationDetailPage from "./pages/hr/ApplicationDetailPage.jsx";
 import ApplicationSubmitPage from "./pages/interns/ApplicationSubmitPage.jsx";
 import InternApplicationsPage from "./pages/interns/InternApplicationsPage.jsx";
 
+import Programs from "./pages/hr/Programs";
+import MySchedule from "./pages/interns/MySchedule";
+
+import Groups from "./pages/hr/Groups";
+
+
 function Unauthorized() {
     return (
         <div style={{padding: 24}}>
@@ -83,6 +89,10 @@ function AppContent() {
                             {/* HR document viewer (choose intern inside the page) */}
                             <Route path="/hr/documents" element={<HrDocumentsPage/>}/>
                             <Route path="/hr/documents/contracts" element={<HrUploadInternshipContract/>}/>
+
+                            <Route path="/hr/programs" element={<Programs />} />
+                            <Route path="/hr/groups" element={<Groups />} />
+
                         </Route>
 
                         <Route
@@ -99,6 +109,8 @@ function AppContent() {
                             <Route path="/intern/apply" element={<ApplicationSubmitPage/>}/>
                             <Route path="/intern/applications" element={<InternApplicationsPage />} />
                             <Route path="/intern/contracts" element={<InternContractConfirmPage/>}/>
+                            <Route path="/interns/me/schedule" element={<MySchedule />} />
+
                         </Route>
                     </Route>
                 </Route>

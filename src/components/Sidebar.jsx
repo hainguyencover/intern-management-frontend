@@ -35,6 +35,9 @@ export default function Sidebar() {
             {label: "Applications", to: "/hr/applications"},
             {label: "Documents (HR)", to: "/hr/documents"},
             {label: "Hợp đồng thực tập", to: "/hr/documents/contracts"},
+            { label: "Programs", to: "/hr/programs" },
+            { label: "Groups", to: "/hr/groups" },
+
         ];
         const mentor = [
             {label: "Assigned Interns", to: "/mentor/interns"},
@@ -45,6 +48,7 @@ export default function Sidebar() {
             {label: "Nộp hồ sơ", to: "/intern/apply"},
             {label: "Hồ sơ ứng tuyển", to: "/intern/applications"},
             {label: "Hợp đồng", to: "/intern/contracts"},
+            { label: "My Schedule", to: "/interns/me/schedule" },
         ];
 
         return [
