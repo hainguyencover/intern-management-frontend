@@ -31,8 +31,10 @@ export default function Sidebar() {
             {label: "Roles & Permissions", to: "/admin/roles"},
         ];
         const hr = [
-            { label: "Interns", to: "/hr/interns" },
-            { label: "Documents (HR)", to: "/hr/documents" },
+            {label: "Interns", to: "/hr/interns"},
+            {label: "Applications", to: "/hr/applications"},
+            {label: "Documents (HR)", to: "/hr/documents"},
+            {label: "Hợp đồng thực tập", to: "/hr/documents/contracts"},
             { label: "Programs", to: "/hr/programs" },
             { label: "Groups", to: "/hr/groups" },
 
@@ -42,8 +44,10 @@ export default function Sidebar() {
             {label: "Reviews", to: "/mentor/reviews"},
         ];
         const intern = [
-            { label: "My Documents", to: "/intern/documents" },
-            { label: "Tasks", to: "/intern/tasks" },
+            {label: "My Documents", to: "/intern/documents"},
+            {label: "Nộp hồ sơ", to: "/intern/apply"},
+            {label: "Hồ sơ ứng tuyển", to: "/intern/applications"},
+            {label: "Hợp đồng", to: "/intern/contracts"},
             { label: "My Schedule", to: "/interns/me/schedule" },
         ];
 
