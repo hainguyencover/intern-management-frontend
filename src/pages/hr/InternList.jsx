@@ -1,6 +1,8 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {useNavigate} from "react-router-dom";
-import {internApi} from "../../api/internApi";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { internApi } from "../../api/internApi";
+import { listMentors } from "../../api/mentorApi";
+import MentorAssignmentModal from "../../components/hr/MentorAssignmentModal.jsx";
 
 export default function InternList() {
     const nav = useNavigate();
@@ -25,9 +27,18 @@ export default function InternList() {
 
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
+    const [mentorsMap, setMentorsMap] = useState({});
+
+    // Mentor assignment
+    const [assignModal, setAssignModal] = useState({
+        open: false,
+        internId: null,
+        currentMentorId: null,
+        internName: "",
+    });
 
     const params = useMemo(() => {
-        const p = {page, size};
+        const p = { page, size };
         if (q.trim()) p.q = q.trim();
         if (university.trim()) p.university = university.trim();
         if (major.trim()) p.major = major.trim();
@@ -47,6 +58,20 @@ export default function InternList() {
         }
     };
 
+    // Fetch mentors map
+    useEffect(() => {
+        listMentors()
+            .then((res) => {
+                const list = Array.isArray(res) ? res : res.content || [];
+                const map = {};
+                list.forEach((m) => {
+                    map[m.id] = m.fullName;
+                });
+                setMentorsMap(map);
+            })
+            .catch(console.error);
+    }, []);
+
     // auto reload when paging changes
     useEffect(() => {
         fetchList();
@@ -65,6 +90,23 @@ export default function InternList() {
         setPage(0);
         // fetch with cleared state
         setTimeout(fetchList, 0);
+    };
+
+    const openAssignModal = (it) => {
+        setAssignModal({
+            open: true,
+            internId: it.id ?? it.internId ?? it._id,
+            currentMentorId: it.mentorId,
+            internName: it.fullName,
+        });
+    };
+
+    const closeAssignModal = () => {
+        setAssignModal((p) => ({ ...p, open: false }));
+    };
+
+    const handleAssignSuccess = () => {
+        fetchList();
     };
 
     const content = data?.content || [];
@@ -95,7 +137,7 @@ export default function InternList() {
                 </button>
             </div>
 
-            <div className="h-4"/>
+            <div className="h-4" />
 
             {/* Filters */}
             <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -151,7 +193,7 @@ export default function InternList() {
                 </div>
             </section>
 
-            <div className="h-4"/>
+            <div className="h-4" />
 
             {/* Table */}
             <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -177,64 +219,84 @@ export default function InternList() {
                     <div className="w-full overflow-x-auto">
                         <table className="w-full min-w-[900px] border-collapse text-left text-sm">
                             <thead className="bg-white">
-                            <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-500">
-                                <th className="px-4 py-3">Full name</th>
-                                <th className="px-4 py-3">Email</th>
-                                <th className="px-4 py-3">Phone</th>
-                                <th className="px-4 py-3">University</th>
-                                <th className="px-4 py-3">Major</th>
-                                <th className="px-4 py-3 text-right">Actions</th>
-                            </tr>
+                                <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-500">
+                                    <th className="px-4 py-3">Full name</th>
+                                    <th className="px-4 py-3">Email</th>
+                                    <th className="px-4 py-3">Phone</th>
+                                    <th className="px-4 py-3">University</th>
+                                    <th className="px-4 py-3">Major</th>
+                                    <th className="px-4 py-3">Mentor</th>
+                                    <th className="px-4 py-3 text-right">Actions</th>
+                                </tr>
                             </thead>
 
                             <tbody>
-                            {content.map((it) => {
-                                const id = it.id ?? it.internId ?? it._id;
-                                return (
-                                    <tr
-                                        key={id}
-                                        className="border-b border-slate-100 hover:bg-slate-50"
-                                    >
-                                        <td className="px-4 py-3 font-semibold text-slate-900">
-                                            {it.fullName}
-                                        </td>
-                                        <td className="px-4 py-3 text-slate-700">{it.email}</td>
-                                        <td className="px-4 py-3 text-slate-700">{it.phone}</td>
-                                        <td className="px-4 py-3 text-slate-700">
-                                            {it.university}
-                                        </td>
-                                        <td className="px-4 py-3 text-slate-700">{it.major}</td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex justify-end gap-2">
-                                                <button
-                                                    onClick={() => nav(`/hr/interns/${id}`)}
-                                                    className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 transition hover:bg-slate-50"
-                                                >
-                                                    View
-                                                </button>
+                                {content.map((it) => {
+                                    const id = it.id ?? it.internId ?? it._id;
+                                    const mentorName = it.mentorName || mentorsMap[it.mentorId];
 
-                                                <button
-                                                    onClick={() => nav(`/hr/interns/${id}/edit`)}
-                                                    className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 transition hover:bg-slate-50"
-                                                >
-                                                    Edit
-                                                </button>
-                                            </div>
+                                    return (
+                                        <tr
+                                            key={id}
+                                            className="border-b border-slate-100 hover:bg-slate-50"
+                                        >
+                                            <td className="px-4 py-3 font-semibold text-slate-900">
+                                                {it.fullName}
+                                            </td>
+                                            <td className="px-4 py-3 text-slate-700">{it.email}</td>
+                                            <td className="px-4 py-3 text-slate-700">{it.phone}</td>
+                                            <td className="px-4 py-3 text-slate-700">
+                                                {it.university}
+                                            </td>
+                                            <td className="px-4 py-3 text-slate-700">{it.major}</td>
+                                            <td className="px-4 py-3 text-slate-700">
+                                                {mentorName ? (
+                                                    <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                                                        {mentorName}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-slate-400 italic">---</span>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => openAssignModal(it)}
+                                                        className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 transition hover:bg-slate-50"
+                                                        title="Assign Mentor"
+                                                    >
+                                                        Mentor
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => nav(`/hr/interns/${id}`)}
+                                                        className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 transition hover:bg-slate-50"
+                                                    >
+                                                        View
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => nav(`/hr/interns/${id}/edit`)}
+                                                        className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 transition hover:bg-slate-50"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+
+                                {content.length === 0 && (
+                                    <tr>
+                                        <td
+                                            colSpan={7}
+                                            className="px-4 py-10 text-center text-sm text-slate-500"
+                                        >
+                                            No interns found.
                                         </td>
                                     </tr>
-                                );
-                            })}
-
-                            {content.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="px-4 py-10 text-center text-sm text-slate-500"
-                                    >
-                                        No interns found.
-                                    </td>
-                                </tr>
-                            )}
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -266,8 +328,8 @@ export default function InternList() {
                                     {" "}
                                     /{" "}
                                     <span className="font-semibold text-slate-900">
-                    {totalPages}
-                  </span>
+                                        {totalPages}
+                                    </span>
                                 </>
                             ) : null}
                         </div>
@@ -289,6 +351,15 @@ export default function InternList() {
                     </div>
                 </div>
             </section>
+
+            <MentorAssignmentModal
+                isOpen={assignModal.open}
+                onClose={closeAssignModal}
+                internId={assignModal.internId}
+                currentMentorId={assignModal.currentMentorId}
+                onSuccess={handleAssignSuccess}
+                internName={assignModal.internName}
+            />
         </div>
     );
 }

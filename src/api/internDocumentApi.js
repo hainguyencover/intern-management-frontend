@@ -167,16 +167,12 @@ export const internDocumentApi = {
         try {
             const endpoints = [
                 {
-                    url: `/api/documents/${id}/approve`,
-                    config: {params: {hrUserId}},
-                },
-                {
                     url: `/api/hr/documents/${id}/approve`,
-                    config: {params: {hrUserId}},
+                    config: { params: { hrUserId } },
                 },
                 {
                     url: `/api/hr/documents/${id}`,
-                    config: {params: {action: "approve", hrUserId}},
+                    config: { params: { action: "approve", hrUserId } },
                 },
             ];
 
@@ -191,16 +187,12 @@ export const internDocumentApi = {
         try {
             const endpoints = [
                 {
-                    url: `/api/documents/${id}/reject`,
-                    config: {params: {hrUserId, note}},
-                },
-                {
                     url: `/api/hr/documents/${id}/reject`,
-                    config: {params: {hrUserId, note}},
+                    config: { params: { hrUserId, note } },
                 },
                 {
                     url: `/api/hr/documents/${id}`,
-                    config: {params: {action: "reject", hrUserId, note}},
+                    config: { params: { action: "reject", hrUserId, note } },
                 },
             ];
 
