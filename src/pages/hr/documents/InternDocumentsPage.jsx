@@ -1,6 +1,6 @@
 import React from "react";
-import InternDocuments from "../../components/documents/InternDocuments";
-import {useAuth} from "../../auth/AuthContext";
+import InternDocuments from "../../../components/documents/InternDocuments.jsx";
+import {useAuth} from "../../../auth/AuthContext.jsx";
 
 export default function InternDocumentsPage() {
     const { user } = useAuth();
