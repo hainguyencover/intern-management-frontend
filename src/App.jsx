@@ -1,6 +1,6 @@
 import React from "react";
-import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import {AuthProvider, useAuth} from "./auth/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import "./index.css";
 import Login from "./pages/Login";
@@ -8,6 +8,11 @@ import Register from "./pages/Register";
 import MainLayout from "./layouts/MainLayout";
 
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import RoleManagement from "./pages/admin/RolePermissionsPage.jsx";
+import BackupManagement from "./pages/admin/BackupManagement";
+import AuditLogsPage from "./pages/admin/AuditLogsPage.jsx";
+
 import HrDashboard from "./pages/dashboard/HrDashboard";
 import MentorDashboard from "./pages/dashboard/MentorDashboard";
 import InternDashboard from "./pages/dashboard/InternDashboard";
@@ -19,7 +24,7 @@ import MyProfile from "./pages/interns/MyProfile";
 import HrDocumentsPage from "./pages/hr/documents/HrDocumentsPage";
 import InternDocumentsPage from "./pages/hr/documents/InternDocumentsPage";
 import HrUploadInternshipContract from "./pages/hr/documents/contracts/HrUploadInternshipContract";
-import {Toaster} from "sonner";
+import { Toaster } from "sonner";
 import InternContractConfirmPage from "./pages/interns/contracts/InternContractConfirmPage.jsx";
 import ApplicationListPage from "./pages/hr/ApplicationListPage.jsx";
 import ApplicationDetailPage from "./pages/hr/ApplicationDetailPage.jsx";
@@ -34,7 +39,7 @@ import Groups from "./pages/hr/Groups";
 
 function Unauthorized() {
     return (
-        <div style={{padding: 24}}>
+        <div style={{ padding: 24 }}>
             <h2>Unauthorized</h2>
             <p>You don’t have permission to access this page.</p>
         </div>
@@ -42,7 +47,7 @@ function Unauthorized() {
 }
 
 function AppContent() {
-    const {user} = useAuth();
+    const { user } = useAuth();
     const roles = user?.roles || [];
 
     // Determine default dashboard based on user's primary role
@@ -58,37 +63,41 @@ function AppContent() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/login" element={<Login/>}/>
-                <Route path="/register" element={<Register/>}/>
-                <Route path="/unauthorized" element={<Unauthorized/>}/>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/unauthorized" element={<Unauthorized />} />
 
                 {/* Protected area */}
-                <Route element={<ProtectedRoute/>}>
-                    <Route element={<MainLayout/>}>
-                        <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<MainLayout />}>
+                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
                         <Route
                             path="/dashboard"
-                            element={<Navigate to={defaultDashboard} replace/>}
+                            element={<Navigate to={defaultDashboard} replace />}
                         />
 
                         {/* profile accessible to any authenticated user */}
-                        <Route path="/profile" element={<MyProfile/>}/>
+                        <Route path="/profile" element={<MyProfile />} />
 
-                        <Route element={<ProtectedRoute allowRoles={["ADMIN"]}/>}>
-                            <Route path="/dashboard/admin" element={<AdminDashboard/>}/>
+                        <Route element={<ProtectedRoute allowRoles={["ADMIN"]} />}>
+                            <Route path="/dashboard/admin" element={<AdminDashboard />} />
+                            <Route path="/admin/users" element={<UserManagement />} />
+                            <Route path="/admin/roles" element={<RoleManagement />} />
+                            <Route path="/admin/system/backup" element={<BackupManagement />} />
+                            <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
                         </Route>
 
-                        <Route element={<ProtectedRoute allowRoles={["HR", "ADMIN"]}/>}>
-                            <Route path="/dashboard/hr" element={<HrDashboard/>}/>
-                            <Route path="/hr/interns" element={<InternList/>}/>
-                            <Route path="/hr/interns/new" element={<CreateIntern/>}/>
-                            <Route path="/hr/interns/:id/edit" element={<EditIntern/>}/>
-                            <Route path="/hr/interns/:internId" element={<InternDetail/>}/>
-                            <Route path="/hr/applications" element={<ApplicationListPage/>}/>
-                            <Route path="/hr/applications/:id" element={<ApplicationDetailPage/>}/>
+                        <Route element={<ProtectedRoute allowRoles={["HR", "ADMIN"]} />}>
+                            <Route path="/dashboard/hr" element={<HrDashboard />} />
+                            <Route path="/hr/interns" element={<InternList />} />
+                            <Route path="/hr/interns/new" element={<CreateIntern />} />
+                            <Route path="/hr/interns/:id/edit" element={<EditIntern />} />
+                            <Route path="/hr/interns/:internId" element={<InternDetail />} />
+                            <Route path="/hr/applications" element={<ApplicationListPage />} />
+                            <Route path="/hr/applications/:id" element={<ApplicationDetailPage />} />
                             {/* HR document viewer (choose intern inside the page) */}
-                            <Route path="/hr/documents" element={<HrDocumentsPage/>}/>
-                            <Route path="/hr/documents/contracts" element={<HrUploadInternshipContract/>}/>
+                            <Route path="/hr/documents" element={<HrDocumentsPage />} />
+                            <Route path="/hr/documents/contracts" element={<HrUploadInternshipContract />} />
 
                             <Route path="/hr/programs" element={<Programs />} />
                             <Route path="/hr/groups" element={<Groups />} />
@@ -96,28 +105,28 @@ function AppContent() {
                         </Route>
 
                         <Route
-                            element={<ProtectedRoute allowRoles={["MENTOR", "ADMIN"]}/>}
+                            element={<ProtectedRoute allowRoles={["MENTOR", "ADMIN"]} />}
                         >
-                            <Route path="/dashboard/mentor" element={<MentorDashboard/>}/>
+                            <Route path="/dashboard/mentor" element={<MentorDashboard />} />
                         </Route>
 
                         <Route
-                            element={<ProtectedRoute allowRoles={["INTERN", "ADMIN"]}/>}
+                            element={<ProtectedRoute allowRoles={["INTERN", "ADMIN"]} />}
                         >
-                            <Route path="/dashboard/intern" element={<InternDashboard/>}/>
-                            <Route path="/intern/documents" element={<InternDocumentsPage/>}/>
-                            <Route path="/intern/apply" element={<ApplicationSubmitPage/>}/>
+                            <Route path="/dashboard/intern" element={<InternDashboard />} />
+                            <Route path="/intern/documents" element={<InternDocumentsPage />} />
+                            <Route path="/intern/apply" element={<ApplicationSubmitPage />} />
                             <Route path="/intern/applications" element={<InternApplicationsPage />} />
-                            <Route path="/intern/contracts" element={<InternContractConfirmPage/>}/>
+                            <Route path="/intern/contracts" element={<InternContractConfirmPage />} />
                             <Route path="/interns/me/schedule" element={<MySchedule />} />
 
                         </Route>
                     </Route>
                 </Route>
 
-                <Route path="*" element={<Navigate to="/login" replace/>}/>
+                <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
-            <Toaster richColors position="top-right"/>
+            <Toaster richColors position="top-right" />
         </BrowserRouter>
     );
 }
@@ -125,7 +134,7 @@ function AppContent() {
 export default function App() {
     return (
         <AuthProvider>
-            <AppContent/>
+            <AppContent />
         </AuthProvider>
     );
 }
