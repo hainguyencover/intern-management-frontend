@@ -60,9 +60,9 @@ async function tryEndpoints(method, endpoints, options = {}) {
         const url = typeof ep === "string" ? ep : ep.url;
         const baseCfg = options.config || {};
         const epCfg = (typeof ep === "object" && ep.config) ? ep.config : {};
-        const cfg = {...baseCfg, ...epCfg};
+        const cfg = { ...baseCfg, ...epCfg };
         // merge sâu params (rất quan trọng)
-        cfg.params = {...(baseCfg.params || {}), ...(epCfg.params || {})};
+        cfg.params = { ...(baseCfg.params || {}), ...(epCfg.params || {}) };
         try {
             if (method === "get") return await axiosClient.get(url, cfg);
             if (method === "post") return await axiosClient.post(url, options.body, cfg);
@@ -114,7 +114,7 @@ export const internDocumentApi = {
                 "/api/documents",
             ];
 
-            const eps = endpoints.map((u) => ({url: u}));
+            const eps = endpoints.map((u) => ({ url: u }));
             const res = await tryEndpoints("get", eps);
             return res.data;
         } catch (err) {
@@ -125,22 +125,25 @@ export const internDocumentApi = {
     // uploadDocument: backend expects a multipart/form-data with fields:
     // - type (string)
     // - file (the uploaded file)
-    // Do NOT send internId; backend uses authenticated user.
-    uploadDocument: async ({type, file}) => {
+    // - internId (optional, required if user is HR/ADMIN)
+    uploadDocument: async ({ type, file, internId }) => {
         try {
             const form = new FormData();
             // ensure expected field names
             form.append("type", type);
             form.append("file", file);
+            if (internId) {
+                form.append("internId", internId);
+            }
 
             const endpoints = [
-                {url: "/api/intern/documents"},
-                {url: "/api/me/documents"},
-                {url: "/api/documents/upload"},
-                {url: "/api/documents"},
+                { url: "/api/intern/documents" },
+                { url: "/api/me/documents" },
+                { url: "/api/documents/upload" },
+                { url: "/api/documents" },
             ];
 
-            const res = await tryEndpoints("post", endpoints, {body: form});
+            const res = await tryEndpoints("post", endpoints, { body: form });
             return res.data;
         } catch (err) {
             handleAxiosError(err);
@@ -148,14 +151,14 @@ export const internDocumentApi = {
     },
 
     // ========== HR ==========
-    getInternDocuments: async ({internId}) => {
+    getInternDocuments: async ({ internId }) => {
         try {
             const endpoints = [
                 `/api/hr/interns/${internId}/documents`,
                 `/api/interns/${internId}/documents`,
                 `/api/documents?internId=${internId}`,
             ];
-            const eps = endpoints.map((u) => ({url: u}));
+            const eps = endpoints.map((u) => ({ url: u }));
             const res = await tryEndpoints("get", eps);
             return res.data;
         } catch (err) {
@@ -163,20 +166,20 @@ export const internDocumentApi = {
         }
     },
 
-    approveDocument: async ({id, hrUserId}) => {
+    approveDocument: async ({ id, hrUserId }) => {
         try {
             const endpoints = [
                 {
                     url: `/api/documents/${id}/approve`,
-                    config: {params: {hrUserId}},
+                    config: { params: { hrUserId } },
                 },
                 {
                     url: `/api/hr/documents/${id}/approve`,
-                    config: {params: {hrUserId}},
+                    config: { params: { hrUserId } },
                 },
                 {
                     url: `/api/hr/documents/${id}`,
-                    config: {params: {action: "approve", hrUserId}},
+                    config: { params: { action: "approve", hrUserId } },
                 },
             ];
 
@@ -187,20 +190,20 @@ export const internDocumentApi = {
         }
     },
 
-    rejectDocument: async ({id, hrUserId, note}) => {
+    rejectDocument: async ({ id, hrUserId, note }) => {
         try {
             const endpoints = [
                 {
                     url: `/api/documents/${id}/reject`,
-                    config: {params: {hrUserId, note}},
+                    config: { params: { hrUserId, note } },
                 },
                 {
                     url: `/api/hr/documents/${id}/reject`,
-                    config: {params: {hrUserId, note}},
+                    config: { params: { hrUserId, note } },
                 },
                 {
                     url: `/api/hr/documents/${id}`,
-                    config: {params: {action: "reject", hrUserId, note}},
+                    config: { params: { action: "reject", hrUserId, note } },
                 },
             ];
 
@@ -212,7 +215,7 @@ export const internDocumentApi = {
     },
 
     // ========== DOWNLOAD ==========
-    downloadDocument: async ({id, requesterUserId, isHr}) => {
+    downloadDocument: async ({ id, requesterUserId, isHr }) => {
         try {
             const urls = isHr
                 ? [
@@ -228,12 +231,12 @@ export const internDocumentApi = {
 
             const baseConfig = {
                 responseType: "blob",
-                params: {requesterUserId},
+                params: { requesterUserId },
             };
 
-            const endpoints = urls.map((u) => ({url: u, config: baseConfig}));
+            const endpoints = urls.map((u) => ({ url: u, config: baseConfig }));
 
-            return await tryEndpoints("get", endpoints, {config: baseConfig});
+            return await tryEndpoints("get", endpoints, { config: baseConfig });
         } catch (err) {
             handleAxiosError(err);
         }

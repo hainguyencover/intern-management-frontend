@@ -1,69 +1,121 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Users, Shield, Database, FileText } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Card, Row, Col, Statistic } from "antd";
+import { UserOutlined, FileTextOutlined, TeamOutlined } from "@ant-design/icons";
+import Loading from "../../components/Loading";
+import PageHeader from "../../components/PageHeader";
+import { dashboardApi } from "../../api/dashboardApi";
 
 export default function AdminDashboard() {
-    const nav = useNavigate();
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const cards = [
-        {
-            title: "User Management",
-            desc: "Create, edit, and manage system accounts (HR, Mentors, Interns).",
-            icon: Users,
-            color: "bg-blue-50 text-blue-600",
-            path: "/admin/users",
-        },
-        {
-            title: "Role & Permissions",
-            desc: "Configure Role-Based Access Control (RBAC) and permissions.",
-            icon: Shield,
-            color: "bg-indigo-50 text-indigo-600",
-            path: "/admin/roles",
-        },
-        {
-            title: "System Backup",
-            desc: "Manage database backups, restore points, and schedules.",
-            icon: Database,
-            color: "bg-emerald-50 text-emerald-600",
-            path: "/admin/system/backup",
-        },
-        {
-            title: "Audit Logs",
-            desc: "View detailed system activity logs and security events.",
-            icon: FileText,
-            color: "bg-amber-50 text-amber-600",
-            path: "/admin/audit-logs",
-        },
-    ];
+    useEffect(() => {
+        loadStats();
+    }, []);
+
+    const loadStats = async () => {
+        try {
+            const res = await dashboardApi.getOverview();
+            setStats(res.data);
+        } catch (error) {
+            console.error("Error loading stats:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) return <Loading />;
 
     return (
-        <div className="mx-auto w-full max-w-6xl p-5">
-            <div className="mb-8">
-                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-                    Admin Dashboard
-                </h1>
-                <p className="mt-2 text-lg text-slate-500">
-                    Welcome back, Admin. Here is your system overview.
-                </p>
-            </div>
+        <div>
+            <PageHeader
+                title="Dashboard Admin"
+                subtitle="Tổng quan hệ thống"
+            />
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-                {cards.map((card) => (
-                    <button
-                        key={card.title}
-                        onClick={() => nav(card.path)}
-                        className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:shadow-md hover:bg-slate-50"
-                    >
-                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${card.color}`}>
-                            <card.icon size={24} />
+            <Row gutter={[16, 16]}>
+                <Col xs={24} sm={12} lg={6}>
+                    <Card>
+                        <Statistic
+                            title="Mentors"
+                            value={stats?.totalMentors}
+                            prefix={<UserOutlined />}
+                            styles={{ content: { color: '#3f8600' } }}
+                        />
+                    </Card>
+                </Col>
+
+                <Col xs={24} sm={12} lg={6}>
+                    <Card>
+                        <Statistic
+                            title="Thực tập sinh"
+                            value={stats?.totalInterns}
+                            prefix={<TeamOutlined />}
+                            styles={{ content: { color: '#1677ff' } }}
+                        />
+                    </Card>
+                </Col>
+
+                <Col xs={24} sm={12} lg={6}>
+                    <Card>
+                        <Statistic
+                            title="Chương trình"
+                            value={stats?.totalPrograms}
+                            prefix={<FileTextOutlined />}
+                            styles={{ content: { color: '#cf1322' } }}
+                        />
+                    </Card>
+                </Col>
+
+                <Col xs={24} sm={12} lg={6}>
+                    <Card>
+                        <Statistic
+                            title="Hồ sơ chờ duyệt"
+                            value={stats?.pendingApplications}
+                            prefix={<FileTextOutlined />}
+                            styles={{ content: { color: '#faad14' } }}
+                        />
+                    </Card>
+                </Col>
+            </Row>
+
+            <Row gutter={[16, 16]} className="mt-4">
+                <Col xs={24} lg={12}>
+                    <Card title="Hoạt động gần đây" className="h-full">
+                        <div className="space-y-3">
+                            <div className="rounded-lg border border-slate-200 p-3">
+                                <p className="text-sm text-slate-600">
+                                    Người dùng <span className="font-semibold">admin@company.com</span> đã đăng nhập
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">2 giờ trước</p>
+                            </div>
+                            <div className="rounded-lg border border-slate-200 p-3">
+                                <p className="text-sm text-slate-600">
+                                    Tạo chương trình thực tập mới: <span className="font-semibold">Summer 2024</span>
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">5 giờ trước</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-lg font-bold text-slate-900">{card.title}</h3>
-                            <p className="mt-1 text-sm text-slate-500">{card.desc}</p>
+                    </Card>
+                </Col>
+
+                <Col xs={24} lg={12}>
+                    <Card title="Cảnh báo hệ thống" className="h-full">
+                        <div className="space-y-3">
+                            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+                                <p className="text-sm text-yellow-800">
+                                    ⚠️ Có 5 tài liệu chờ xác minh
+                                </p>
+                            </div>
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                                <p className="text-sm text-blue-800">
+                                    ℹ️ Sao lưu dữ liệu lần cuối: 2 ngày trước
+                                </p>
+                            </div>
                         </div>
-                    </button>
-                ))}
-            </div>
+                    </Card>
+                </Col>
+            </Row>
         </div>
     );
 }

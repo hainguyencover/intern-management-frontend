@@ -12,6 +12,9 @@ import UserManagement from "./pages/admin/UserManagement";
 import RoleManagement from "./pages/admin/RolePermissionsPage.jsx";
 import BackupManagement from "./pages/admin/BackupManagement";
 import AuditLogsPage from "./pages/admin/AuditLogsPage.jsx";
+import SystemConfig from "./pages/admin/SystemConfig"; // Phase 2
+import HrmIntegration from "./pages/admin/HrmIntegration";
+import TimekeepingIntegration from "./pages/admin/TimekeepingIntegration";
 
 import HrDashboard from "./pages/dashboard/HrDashboard";
 import MentorDashboard from "./pages/dashboard/MentorDashboard";
@@ -35,7 +38,37 @@ import Programs from "./pages/hr/Programs";
 import MySchedule from "./pages/interns/MySchedule";
 
 import Groups from "./pages/hr/Groups";
+import MentorList from "./pages/hr/MentorList";
+import MentorDetail from "./pages/hr/MentorDetail";
+import MentorTasksPage from "./pages/mentor/MentorTasksPage.jsx";
+import WeeklyReportsReviewPage from "./pages/mentor/WeeklyReportsReviewPage.jsx";
+import MyTasksPage from "./pages/interns/MyTasksPage.jsx";
+import WeeklyReportSubmitPage from "./pages/interns/WeeklyReportSubmitPage.jsx";
 
+import MentorInternList from "./pages/mentor/MentorInternList";
+import InternDetailView from "./pages/mentor/InternDetailView";
+import TaskManagement from "./pages/mentor/TaskManagement";
+import TaskCreate from "./pages/mentor/TaskCreate";
+import TaskDetail from "./pages/mentor/TaskDetail";
+import WeeklyReports from "./pages/mentor/WeeklyReports";
+import EvaluationCreate from "./pages/mentor/EvaluationCreate";
+import EvaluationList from "./pages/mentor/EvaluationList";
+
+import AttendancePage from "./pages/interns/AttendancePage";
+import AttendanceReports from "./pages/hr/AttendanceReports";
+import LeaveReports from "./pages/hr/LeaveReports";
+
+import LeaveRequests from "./pages/interns/LeaveRequests";
+import LeaveApprovals from "./pages/hr/LeaveApprovals";
+
+import AllowanceManagement from "./pages/hr/AllowanceManagement";
+import MyAllowance from "./pages/interns/MyAllowance";
+import HelpDesk from "./pages/hr/HelpDesk";
+import SupportTickets from "./pages/interns/SupportTickets";
+import HrDepartmentsPage from "./pages/hr/departments/HrDepartmentsPage";
+import FinalReportPage from "./pages/hr/reports/FinalReportPage";
+import HrReportsPage from "./pages/hr/reports/HrReportsPage";
+import Statistics from "./pages/hr/Statistics";
 
 function Unauthorized() {
     return (
@@ -85,6 +118,12 @@ function AppContent() {
                             <Route path="/admin/roles" element={<RoleManagement />} />
                             <Route path="/admin/system/backup" element={<BackupManagement />} />
                             <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
+
+                            {/* Phase 2: System Config */}
+                            {/* Phase 2: System Config */}
+                            <Route path="/admin/system/config" element={<SystemConfig />} />
+                            <Route path="/admin/hrm" element={<HrmIntegration />} />
+                            <Route path="/admin/attendance-sync" element={<TimekeepingIntegration />} />
                         </Route>
 
                         <Route element={<ProtectedRoute allowRoles={["HR", "ADMIN"]} />}>
@@ -101,6 +140,26 @@ function AppContent() {
 
                             <Route path="/hr/programs" element={<Programs />} />
                             <Route path="/hr/groups" element={<Groups />} />
+                            <Route path="/hr/mentors" element={<MentorList />} />
+                            <Route path="/hr/mentors/:id" element={<MentorDetail />} />
+
+                            {/* Phase 2: Attendance */}
+                            <Route path="/hr/attendance-reports" element={<AttendanceReports />} />
+                            <Route path="/hr/leave-reports" element={<LeaveReports />} />
+
+                            {/* Phase 2: Leave */}
+                            <Route path="/hr/leave-approvals" element={<LeaveApprovals />} />
+
+                            <Route path="/hr/departments" element={<HrDepartmentsPage />} />
+
+                            {/* Phase 2: Allowance & Support */}
+                            <Route path="/hr/allowances" element={<AllowanceManagement />} />
+                            <Route path="/hr/helpdesk" element={<HelpDesk />} />
+
+                            {/* Final Report */}
+                            <Route path="/hr/reports" element={<HrReportsPage />} />
+                            <Route path="/hr/statistics" element={<Statistics />} />
+                            <Route path="/hr/reports/final/:internId" element={<FinalReportPage />} />
 
                         </Route>
 
@@ -108,6 +167,22 @@ function AppContent() {
                             element={<ProtectedRoute allowRoles={["MENTOR", "ADMIN"]} />}
                         >
                             <Route path="/dashboard/mentor" element={<MentorDashboard />} />
+                            <Route path="/mentor/tasks" element={<TaskManagement />} />
+                            <Route path="/mentor/tasks/new" element={<TaskCreate />} />
+                            <Route path="/mentor/tasks/:id" element={<TaskDetail />} />
+                            <Route path="/mentor/tasks/:id/edit" element={<TaskCreate />} />
+
+                            {/* Reports */}
+                            <Route path="/mentor/reports" element={<WeeklyReportsReviewPage />} />
+                            {/* <Route path="/mentor/reports/by-intern" element={<WeeklyReports />} /> */}
+
+                            {/* Quản lý thực tập sinh */}
+                            <Route path="/mentor/interns" element={<MentorInternList />} />
+                            <Route path="/mentor/interns/:internId" element={<InternDetailView />} />
+
+                            {/* Đánh giá */}
+                            <Route path="/mentor/evaluations" element={<EvaluationList />} />
+                            <Route path="/mentor/evaluations/new" element={<EvaluationCreate />} />
                         </Route>
 
                         <Route
@@ -119,7 +194,18 @@ function AppContent() {
                             <Route path="/intern/applications" element={<InternApplicationsPage />} />
                             <Route path="/intern/contracts" element={<InternContractConfirmPage />} />
                             <Route path="/interns/me/schedule" element={<MySchedule />} />
+                            <Route path="/intern/tasks" element={<MyTasksPage />} />
+                            <Route path="/intern/reports/weekly/submit" element={<WeeklyReportSubmitPage />} />
 
+                            {/* Phase 2: Attendance */}
+                            <Route path="/intern/attendance" element={<AttendancePage />} />
+
+                            {/* Phase 2: Leave */}
+                            <Route path="/intern/leave-requests" element={<LeaveRequests />} />
+
+                            {/* Phase 2: Allowance & Support */}
+                            <Route path="/intern/allowances" element={<MyAllowance />} />
+                            <Route path="/intern/support" element={<SupportTickets />} />
                         </Route>
                     </Route>
                 </Route>
@@ -131,10 +217,14 @@ function AppContent() {
     );
 }
 
+import ErrorBoundary from "./components/common/ErrorBoundary";
+
 export default function App() {
     return (
-        <AuthProvider>
-            <AppContent />
-        </AuthProvider>
+        <ErrorBoundary>
+            <AuthProvider>
+                <AppContent />
+            </AuthProvider>
+        </ErrorBoundary>
     );
 }

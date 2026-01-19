@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Database, Download, History, PlayCircle } from "lucide-react";
-import {backupApi as adminApi} from "../../api/backupApi.js";
+import { backupApi as adminApi } from "../../api/backupApi.js";
 
 export default function BackupManagement() {
     const [backups, setBackups] = useState([]);
@@ -16,7 +16,7 @@ export default function BackupManagement() {
         setLoading(true);
         try {
             const res = await adminApi.getBackupHistory();
-            setBackups(res.data || []);
+            setBackups(res.data?.content || []);
         } catch (error) {
             // toast.error("Failed to load backup history"); 
             console.error(error);
@@ -135,8 +135,8 @@ export default function BackupManagement() {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${item.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-700' :
-                                                            item.status === 'RUNNING' ? 'bg-amber-50 text-amber-700' :
-                                                                'bg-rose-50 text-rose-700'
+                                                        item.status === 'RUNNING' ? 'bg-amber-50 text-amber-700' :
+                                                            'bg-rose-50 text-rose-700'
                                                         }`}>
                                                         {item.status}
                                                     </span>

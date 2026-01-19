@@ -1,55 +1,61 @@
-import {useState} from "react";
-import axios from "../../api/axiosClient";
+import React, { useState } from "react";
+import { Form, Input, Button, Card, Alert, Space } from "antd";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { documentApi as applicationApi } from "../../api/applicationApi.js";
 
 export default function ApplicationSubmitPage() {
-    const [position, setPosition] = useState("");
-    const [note, setNote] = useState("");
+    const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
+    const navigate = useNavigate();
 
-    const submit = async () => {
+    const handleSubmit = async (values) => {
         setLoading(true);
         try {
-            await axios.post("/api/applications", {position, note});
-            setSuccess(true);
+            await applicationApi.submit(values);
+            toast.success("Nộp hồ sơ thành công!");
+            navigate("/intern/applications");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Nộp hồ sơ thất bại");
         } finally {
             setLoading(false);
         }
     };
 
-    if (success) {
-        return (
-            <div className="p-6">
-                <h2 className="text-xl font-semibold">Đã nộp hồ sơ thành công</h2>
-            </div>
-        );
-    }
-
     return (
-        <div className="p-6 space-y-4 max-w-xl">
-            <h1 className="text-xl font-semibold">Nộp hồ sơ thực tập</h1>
+        <div className="mx-auto max-w-3xl">
+            <Card title="Nộp hồ sơ ứng tuyển">
+                <Alert
+                    title="Lưu ý"
+                    description="Hãy đảm bảo bạn đã upload đầy đủ CV và các tài liệu cần thiết trước khi nộp hồ sơ."
+                    type="info"
+                    showIcon
+                    className="mb-6"
+                />
 
-            <input
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-                placeholder="Vị trí ứng tuyển"
-                className="w-full h-10 px-3 border rounded-lg"
-            />
+                <Form form={form} layout="vertical" onFinish={handleSubmit}>
+                    <Form.Item
+                        label="Vị trí ứng tuyển"
+                        name="position"
+                        rules={[{ required: true, message: "Vui lòng nhập vị trí" }]}
+                    >
+                        <Input placeholder="Frontend Developer Intern" />
+                    </Form.Item>
 
-            <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Ghi chú"
-                className="w-full min-h-[120px] p-3 border rounded-lg"
-            />
+                    <Form.Item label="Ghi chú" name="note">
+                        <Input.TextArea rows={4} placeholder="Thêm ghi chú (nếu có)" />
+                    </Form.Item>
 
-            <button
-                onClick={submit}
-                disabled={loading}
-                className="px-4 h-10 rounded-lg border"
-            >
-                Gửi hồ sơ
-            </button>
+                    <Space>
+                        <Button type="primary" htmlType="submit" loading={loading} size="large">
+                            Nộp hồ sơ
+                        </Button>
+                        <Button onClick={() => navigate("/intern/documents")}>
+                            Quản lý tài liệu
+                        </Button>
+                    </Space>
+                </Form>
+            </Card>
         </div>
     );
 }
