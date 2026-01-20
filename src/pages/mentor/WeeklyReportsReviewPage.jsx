@@ -55,7 +55,7 @@ export default function WeeklyReportsReviewPage() {
     const openFeedback = (r) => {
         setSelected(r);
         setFb({
-            feedback: r.feedback || "",
+            feedback: r.mentorFeedback || "",
             rating: r.rating != null ? String(r.rating) : "",
         });
         setOpenFb(true);
@@ -152,7 +152,7 @@ export default function WeeklyReportsReviewPage() {
                                             </div>
                                             {r.internId ? (
                                                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
-                                                    Intern: {r.internId}
+                                                    Intern: {r.internId} - {r.internName}
                                                 </span>
                                             ) : null}
                                             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
@@ -164,10 +164,17 @@ export default function WeeklyReportsReviewPage() {
                                             {r.summary || "(no summary)"}
                                         </div>
 
-                                        {r.feedback ? (
+                                        {(r.mentorFeedback || r.rating !== null) ? (
                                             <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                                                <div className="text-xs font-extrabold text-slate-700">Mentor feedback</div>
-                                                <div className="mt-1 text-sm text-slate-800 whitespace-pre-wrap">{r.feedback}</div>
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="text-xs font-extrabold text-slate-700">Mentor feedback</div>
+                                                    {r.rating !== null && (
+                                                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                                                            Rating: {r.rating}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-slate-800 whitespace-pre-wrap">{r.mentorFeedback || <i>(No text feedback)</i>}</div>
                                             </div>
                                         ) : null}
                                     </div>

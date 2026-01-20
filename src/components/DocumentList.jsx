@@ -2,8 +2,23 @@ import React from "react";
 import { Table, Button, Popconfirm } from "antd";
 import { DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import StatusBadge from "./StatusBadge";
+import { documentApi } from "../api/documentApi";
+import { toast } from "sonner";
 
 export default function DocumentList({ documents, onDelete, loading }) {
+    const handleView = async (docId) => {
+        try {
+            const response = await documentApi.download(docId);
+            const blob = new Blob([response.data], { type: response.headers['content-type'] || 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, "_blank");
+            setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+        } catch (error) {
+            console.error(error);
+            toast.error("Không thể xem file. Vui lòng thử lại.");
+        }
+    };
+
     const columns = [
         {
             title: "Loại",
@@ -15,7 +30,7 @@ export default function DocumentList({ documents, onDelete, loading }) {
             dataIndex: "fileName",
             key: "fileName",
             render: (text, record) => (
-                <a href={record.fileUrl} target="_blank" rel="noopener noreferrer">
+                <a onClick={() => handleView(record.id)} className="cursor-pointer text-blue-600 hover:underline">
                     {text || "Document"}
                 </a>
             ),
@@ -46,8 +61,7 @@ export default function DocumentList({ documents, onDelete, loading }) {
                     <Button
                         icon={<EyeOutlined />}
                         size="small"
-                        href={record.fileUrl}
-                        target="_blank"
+                        onClick={() => handleView(record.id)}
                     >
                         Xem
                     </Button>

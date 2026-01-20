@@ -4,6 +4,7 @@ export const documentApi = {
     submit: (payload) => axiosClient.post("/api/applications", payload),
     getMyApplications: () => axiosClient.get("/api/applications/me"),
     getApplicationDetail: (id) => axiosClient.get(`/api/applications/${id}`),
+    reviewApplication: (id, data) => axiosClient.post(`/api/applications/${id}/review`, data),
     // Intern endpoints
     upload: (formData) => axiosClient.post("/api/documents/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" }

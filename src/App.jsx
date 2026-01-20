@@ -1,7 +1,9 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
+import InternGuard from "./auth/InternGuard";
 import "./index.css";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -25,10 +27,11 @@ import EditIntern from "./pages/hr/EditIntern";
 import InternDetail from "./pages/hr/InternDetail.jsx";
 import MyProfile from "./pages/interns/MyProfile";
 import HrDocumentsPage from "./pages/hr/documents/HrDocumentsPage";
-import InternDocumentsPage from "./pages/hr/documents/InternDocumentsPage";
+
+import InternDocumentsPage from "./pages/interns/InternDocumentsPage";
 import HrUploadInternshipContract from "./pages/hr/documents/contracts/HrUploadInternshipContract";
-import { Toaster } from "sonner";
-import InternContractConfirmPage from "./pages/interns/contracts/InternContractConfirmPage.jsx";
+import InternContractsPage from "./pages/interns/InternContractsPage";
+// import InternContractConfirmPage from "./pages/interns/contracts/InternContractConfirmPage.jsx";
 import ApplicationListPage from "./pages/hr/ApplicationListPage.jsx";
 import ApplicationDetailPage from "./pages/hr/ApplicationDetailPage.jsx";
 import ApplicationSubmitPage from "./pages/interns/ApplicationSubmitPage.jsx";
@@ -53,6 +56,7 @@ import TaskDetail from "./pages/mentor/TaskDetail";
 import WeeklyReports from "./pages/mentor/WeeklyReports";
 import EvaluationCreate from "./pages/mentor/EvaluationCreate";
 import EvaluationList from "./pages/mentor/EvaluationList";
+import EvaluationDetail from "./pages/mentor/EvaluationDetail";
 
 import AttendancePage from "./pages/interns/AttendancePage";
 import AttendanceReports from "./pages/hr/AttendanceReports";
@@ -120,8 +124,6 @@ function AppContent() {
                             <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
 
                             {/* Phase 2: System Config */}
-                            {/* Phase 2: System Config */}
-                            <Route path="/admin/system/config" element={<SystemConfig />} />
                             <Route path="/admin/hrm" element={<HrmIntegration />} />
                             <Route path="/admin/attendance-sync" element={<TimekeepingIntegration />} />
                         </Route>
@@ -183,29 +185,60 @@ function AppContent() {
                             {/* Đánh giá */}
                             <Route path="/mentor/evaluations" element={<EvaluationList />} />
                             <Route path="/mentor/evaluations/new" element={<EvaluationCreate />} />
+                            <Route path="/mentor/evaluations/:id" element={<EvaluationDetail />} />
                         </Route>
 
                         <Route
                             element={<ProtectedRoute allowRoles={["INTERN", "ADMIN"]} />}
                         >
-                            <Route path="/dashboard/intern" element={<InternDashboard />} />
+                            {/* Public Intern Routes (Onboarding) */}
                             <Route path="/intern/documents" element={<InternDocumentsPage />} />
+                            <Route path="/intern/contracts" element={<InternContractsPage />} />
                             <Route path="/intern/apply" element={<ApplicationSubmitPage />} />
-                            <Route path="/intern/applications" element={<InternApplicationsPage />} />
-                            <Route path="/intern/contracts" element={<InternContractConfirmPage />} />
-                            <Route path="/interns/me/schedule" element={<MySchedule />} />
-                            <Route path="/intern/tasks" element={<MyTasksPage />} />
-                            <Route path="/intern/reports/weekly/submit" element={<WeeklyReportSubmitPage />} />
+                            <Route
+                                path="/intern/applications"
+                                element={<InternApplicationsPage />}
+                            />
 
-                            {/* Phase 2: Attendance */}
-                            <Route path="/intern/attendance" element={<AttendancePage />} />
+                            {/* Protected Intern Routes (Approved only) */}
+                            <Route element={<InternGuard />}>
+                                <Route path="/dashboard/intern" element={<InternDashboard />} />
+                                {/* <Route
+                                    path="/intern/contracts"
+                                    element={<InternContractConfirmPage />}
+                                /> */}
+                                <Route
+                                    path="/interns/me/schedule"
+                                    element={<MySchedule />}
+                                />
+                                <Route path="/intern/tasks" element={<MyTasksPage />} />
+                                <Route
+                                    path="/intern/reports/weekly/submit"
+                                    element={<WeeklyReportSubmitPage />}
+                                />
 
-                            {/* Phase 2: Leave */}
-                            <Route path="/intern/leave-requests" element={<LeaveRequests />} />
+                                {/* Phase 2: Attendance */}
+                                <Route
+                                    path="/intern/attendance"
+                                    element={<AttendancePage />}
+                                />
 
-                            {/* Phase 2: Allowance & Support */}
-                            <Route path="/intern/allowances" element={<MyAllowance />} />
-                            <Route path="/intern/support" element={<SupportTickets />} />
+                                {/* Phase 2: Leave */}
+                                <Route
+                                    path="/intern/leave-requests"
+                                    element={<LeaveRequests />}
+                                />
+
+                                {/* Phase 2: Allowance & Support */}
+                                <Route
+                                    path="/intern/allowances"
+                                    element={<MyAllowance />}
+                                />
+                                <Route
+                                    path="/intern/support"
+                                    element={<SupportTickets />}
+                                />
+                            </Route>
                         </Route>
                     </Route>
                 </Route>

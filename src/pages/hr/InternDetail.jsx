@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { internApi } from "../../api/internApi";
 import { documentApi } from "../../api/documentApi";
 import StatusBadge from "../../components/StatusBadge";
+import DocumentPreview from "../../components/DocumentPreview";
 import { toast } from "sonner";
 
 export default function InternDetail() {
@@ -17,6 +18,12 @@ export default function InternDetail() {
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [decision, setDecision] = useState("");
     const [note, setNote] = useState("");
+
+    // Preview State
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [previewVisible, setPreviewVisible] = useState(false);
+    const [previewTitle, setPreviewTitle] = useState("");
+    const [previewFileType, setPreviewFileType] = useState("");
 
     const fetchData = async () => {
         try {
@@ -52,6 +59,31 @@ export default function InternDetail() {
         } catch (err) {
             toast.error(err.response?.data?.message || "Có lỗi xảy ra");
         }
+    };
+
+    const handleView = async (doc) => {
+        try {
+            const res = await documentApi.download(doc.id);
+            // res is axios response, data is blob
+            const blob = new Blob([res.data], { type: res.headers["content-type"] });
+            const url = window.URL.createObjectURL(blob);
+            setPreviewUrl(url);
+            setPreviewTitle(doc.type);
+            setPreviewFileType(res.headers["content-type"]);
+            setPreviewVisible(true);
+        } catch (err) {
+            console.error(err);
+            toast.error("Không thể tải tài liệu để xem trước.");
+        }
+    };
+
+    const handleClosePreview = () => {
+        setPreviewVisible(false);
+        if (previewUrl) {
+            window.URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+        }
+        setPreviewTitle("");
     };
 
     if (loading) {
@@ -161,14 +193,12 @@ export default function InternDetail() {
                                             Duyệt
                                         </button>
                                     )}
-                                    <a
-                                        href={doc.fileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <button
+                                        onClick={() => handleView(doc)}
                                         className="text-sm font-semibold text-slate-600 hover:underline"
                                     >
                                         Xem
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -233,6 +263,15 @@ export default function InternDetail() {
                     </div>
                 </div>
             )}
+
+            <DocumentPreview
+                open={previewVisible}
+                url={previewUrl}
+                onClose={handleClosePreview}
+                title={previewTitle}
+                fileType={previewFileType}
+            />
+
         </div>
     );
 }

@@ -6,7 +6,8 @@ import { departmentApi } from "../../api/departmentApi";
 import { mentorApi } from "../../api/mentorApi";
 import { internApi } from "../../api/internApi";
 import { toast } from "sonner";
-import { Pencil, Users, Trash2, FileText, Clock, Calendar } from "lucide-react";
+import { Pencil, Users, Trash2, FileText, Clock, Calendar, MoreHorizontal } from "lucide-react";
+import { Dropdown } from "antd";
 
 const DAYS_OF_WEEK = [
     { value: "MONDAY", label: "Thứ 2" },
@@ -93,7 +94,18 @@ export default function Groups() {
             resetForm();
             fetchGroups();
         } catch (err) {
-            toast.error(editingGroup ? "Cập nhật thất bại" : "Tạo nhóm thất bại");
+            const msg = err.response?.data?.message || (editingGroup ? "Cập nhật thất bại" : "Tạo nhóm thất bại");
+            toast.error(msg);
+        }
+    };
+
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            await programGroupService.update(id, { status: newStatus });
+            toast.success(`Đã cập nhật trạng thái: ${newStatus}`);
+            fetchGroups();
+        } catch (err) {
+            toast.error("Không thể cập nhật trạng thái");
         }
     };
 
@@ -143,7 +155,7 @@ export default function Groups() {
         try {
             // Filter only AVAILABLE interns or allow reassignment? Usually AVAILABLE.
             // But let's just search first.
-            const res = await internApi.search({ keyword, page: 0, size: 20 });
+            const res = await internApi.search({ keyword, page: 0, size: 20, excludeBusy: true });
             setAvailableInterns(res.data.content || []);
         } catch (err) {
             console.error("Failed to search interns", err);
@@ -244,18 +256,42 @@ export default function Groups() {
                                             <div className="flex justify-end gap-2">
                                                 <button
                                                     onClick={() => openMemberMgmt(g)}
-                                                    className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                                                    className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors mr-1"
                                                     title="Quản lý thành viên"
                                                 >
                                                     <Users className="h-4 w-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => openEdit(g)}
-                                                    className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                                                    className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors mr-1"
                                                     title="Chỉnh sửa"
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </button>
+                                                <Dropdown
+                                                    menu={{
+                                                        items: [
+                                                            {
+                                                                key: 'ACTIVE',
+                                                                label: 'Kích hoạt / Mở lại',
+                                                                disabled: g.status === 'ACTIVE',
+                                                                onClick: () => handleStatusChange(g.id, 'ACTIVE')
+                                                            },
+                                                            {
+                                                                key: 'CLOSED',
+                                                                label: 'Đóng nhóm (Kết thúc)',
+                                                                disabled: g.status === 'CLOSED',
+                                                                danger: true,
+                                                                onClick: () => handleStatusChange(g.id, 'CLOSED')
+                                                            }
+                                                        ]
+                                                    }}
+                                                    trigger={['click']}
+                                                >
+                                                    <button className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </button>
+                                                </Dropdown>
                                             </div>
                                         </td>
                                     </tr>
@@ -434,8 +470,8 @@ export default function Groups() {
                                         members.map(m => (
                                             <div key={m.internId} className="flex items-center justify-between rounded-lg border p-3 hover:bg-slate-50">
                                                 <div>
-                                                    <p className="font-medium text-sm text-slate-900">{m.fullName}</p>
-                                                    <p className="text-xs text-slate-500">{m.email}</p>
+                                                    <p className="font-medium text-sm text-slate-900">{m.internName}</p>
+                                                    <p className="text-xs text-slate-500">{m.internEmail}</p>
                                                     <p className="text-xs text-slate-500">{m.studentCode}</p>
                                                 </div>
                                                 <div className="flex gap-1">
@@ -471,25 +507,29 @@ export default function Groups() {
                                 />
 
                                 <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-                                    {availableInterns.length === 0 ? (
+                                    {availableInterns
+                                        .filter(intern => !members.some(m => m.internId === intern.id))
+                                        .length === 0 ? (
                                         <p className="text-sm text-slate-500 italic text-center py-8">
-                                            {internSearch ? "Không tìm thấy kết quả." : "Nhập từ khóa để tìm kiếm."}
+                                            {internSearch ? "Không tìm thấy kết quả mới." : "Nhập từ khóa để tìm kiếm."}
                                         </p>
                                     ) : (
-                                        availableInterns.map(intern => (
-                                            <div key={intern.id} className="flex items-center justify-between rounded-lg border border-dashed p-3 hover:bg-slate-50">
-                                                <div>
-                                                    <p className="font-medium text-sm text-slate-900">{intern.fullName}</p>
-                                                    <p className="text-xs text-slate-500">{intern.email} - {intern.studentCode}</p>
+                                        availableInterns
+                                            .filter(intern => !members.some(m => m.internId === intern.id))
+                                            .map(intern => (
+                                                <div key={intern.id} className="flex items-center justify-between rounded-lg border border-dashed p-3 hover:bg-slate-50">
+                                                    <div>
+                                                        <p className="font-medium text-sm text-slate-900">{intern.fullName}</p>
+                                                        <p className="text-xs text-slate-500">{intern.email} - {intern.studentCode}</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleAssignIntern(intern.id)}
+                                                        className="rounded-lg bg-slate-900 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
+                                                    >
+                                                        + Thêm
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleAssignIntern(intern.id)}
-                                                    className="rounded-lg bg-slate-900 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
-                                                >
-                                                    + Thêm
-                                                </button>
-                                            </div>
-                                        ))
+                                            ))
                                     )}
                                 </div>
                             </div>

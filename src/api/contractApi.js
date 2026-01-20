@@ -16,5 +16,7 @@ export const documentApi = {
         responseType: 'blob'
     }),
     getMyContracts: () => axiosClient.get("/api/contracts/me"),
-    confirmContract: (id) => axiosClient.put(`/api/contracts/${id}/sign`, { confirmed: true }),
+    confirmContract: (id) => axiosClient.post(`/api/intern/documents/${id}/confirm`),
 };
+
+export const contractApi = documentApi;

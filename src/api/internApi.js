@@ -16,4 +16,5 @@ export const internApi = {
     // Intern endpoints
     getMyProfile: () => axiosClient.get("/api/interns/me"),
     updateMyProfile: (payload) => axiosClient.put("/api/interns/me", payload),
+    getDashboard: () => axiosClient.get("/api/dashboard/intern"),
 };
