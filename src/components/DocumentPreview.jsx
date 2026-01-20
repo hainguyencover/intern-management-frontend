@@ -1,9 +1,9 @@
 import React from "react";
-import {Modal} from "antd";
+import { Modal } from "antd";
 
-export default function DocumentPreview({url, open, onClose, title = "Xem tài liệu"}) {
-    const isPdf = url?.toLowerCase().endsWith('.pdf');
-    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url || '');
+export default function DocumentPreview({ url, open, onClose, title = "Xem tài liệu", fileType }) {
+    const isPdf = fileType?.includes('pdf') || url?.toLowerCase().endsWith('.pdf');
+    const isImage = fileType?.includes('image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(url || '');
 
     return (
         <Modal

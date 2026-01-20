@@ -1,27 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { internApi } from "../../api/internApi";
 import { toast } from "sonner";
-import { PieChart, BarChart, Activity } from "lucide-react";
+import { PieChart, BarChart, Activity, Award } from "lucide-react";
 import { reportApi } from "../../api/reportApi";
+import { dashboardApi } from "../../api/dashboardApi";
 
 export default function Statistics() {
     const [statsUni, setStatsUni] = useState([]);
     const [statsMajor, setStatsMajor] = useState([]);
     const [statsAssess, setStatsAssess] = useState([]);
+    const [overview, setOverview] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const [resUni, resMajor, resAssess] = await Promise.all([
+                const [resUni, resMajor, resAssess, resOverview] = await Promise.all([
                     internApi.getStatsUniversity(),
                     internApi.getStatsMajor(),
                     reportApi.getStatsAssessment(),
+                    dashboardApi.getOverview(),
                 ]);
                 setStatsUni(resUni.data);
                 setStatsMajor(resMajor.data);
                 setStatsAssess(resAssess.data);
+                setOverview(resOverview.data);
             } catch (err) {
                 toast.error("Không thể tải báo cáo thống kê");
                 console.error(err);
@@ -50,10 +54,33 @@ export default function Statistics() {
             <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2">
                     <Activity className="text-indigo-600" />
-                    Thống kê Tổng quan
+                    Thống kê & Báo cáo
                 </h1>
-                <p className="mt-1 text-sm text-slate-600">Phân tích dữ liệu thực tập sinh theo trường, chuyên ngành và kết quả</p>
+                <p className="mt-1 text-sm text-slate-600">Phân tích dữ liệu thực tập và đánh giá hiệu quả chương trình.</p>
             </div>
+
+            {/* Overview Cards */}
+            {overview && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="rounded-2xl border bg-white p-6 shadow-sm flex items-center gap-4">
+                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                            <Award className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-slate-500">Tỷ lệ hoàn thành</p>
+                            <h3 className="text-2xl font-bold text-slate-900">
+                                {overview.completionRate ? overview.completionRate.toFixed(1) : 0}%
+                            </h3>
+                            <div className="w-24 h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
+                                <div
+                                    className="h-full bg-emerald-500 rounded-full"
+                                    style={{ width: `${overview.completionRate || 0}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {/* Stats by University */}

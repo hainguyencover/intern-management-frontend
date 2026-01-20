@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
-import {authApi} from "../api/authApi";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { authApi } from "../api/authApi";
 
 function normalizeRole(role) {
     if (!role && typeof role !== 'string') return String(role || '').toUpperCase();
@@ -29,7 +29,7 @@ function mapRoles(rawRoles) {
     }).filter(Boolean);
 }
 
-export function AuthProvider({children}) {
+export function AuthProvider({ children }) {
     const [token, setToken] = useState(() => localStorage.getItem("accessToken") || "");
     const [user, setUser] = useState(() => {
         const raw = localStorage.getItem("authUser");
@@ -42,6 +42,9 @@ export function AuthProvider({children}) {
                 email: parsed.email,
                 fullName: parsed.fullName || parsed.name,
                 roles: mapRoles(parsed.roles || parsed.role || parsed.authorities || parsed.authority),
+                status: parsed.status,
+                applicationStatus: parsed.applicationStatus,
+                internId: parsed.internId,
             };
         } catch {
             return null;
@@ -51,11 +54,11 @@ export function AuthProvider({children}) {
 
     const isAuthenticated = !!token;
 
-    const login = async ({email, password}) => {
+    const login = async ({ email, password }) => {
         setLoading(true);
         try {
             // Backend của bạn trả JwtResponse: { token, roles, email, fullName, id }
-            const res = await authApi.login({email, password});
+            const res = await authApi.login({ email, password });
             const data = res.data;
 
             const accessToken = data.token || data.accessToken;
@@ -90,7 +93,7 @@ export function AuthProvider({children}) {
     // Nếu bạn muốn “hydrate” từ /me khi refresh:
     useEffect(() => {
         const run = async () => {
-            if (!token || user) return;
+            if (!token) return; // Always refresh user data on mount if token exists
             try {
                 const res = await authApi.me();
                 const me = res.data;
@@ -99,6 +102,10 @@ export function AuthProvider({children}) {
                     email: me.email,
                     fullName: me.fullName || me.name || me.fullName,
                     roles: mapRoles(me.roles || me.authorities || me.authority),
+                    // US10: Add fields for Intern Guard
+                    status: me.status,
+                    applicationStatus: me.applicationStatus,
+                    internId: me.internId
                 };
                 setUser(nextUser);
                 localStorage.setItem("authUser", JSON.stringify(nextUser));
@@ -111,7 +118,7 @@ export function AuthProvider({children}) {
     }, [token]);
 
     const value = useMemo(
-        () => ({token, user, loading, isAuthenticated, login, logout}),
+        () => ({ token, user, loading, isAuthenticated, login, logout }),
         [token, user, loading, isAuthenticated]
     );
 

@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { reportApi } from "../../../api/reportApi";
-import { FileText, Search, Download } from "lucide-react";
+import { FileText, Search, Download, Printer } from "lucide-react";
 import { toast } from "sonner";
+import { useReactToPrint } from "react-to-print";
 
 export default function HrReportsPage() {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const componentRef = useRef(null);
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -60,11 +62,25 @@ export default function HrReportsPage() {
         document.body.removeChild(link);
     };
 
+    const handlePrint = useReactToPrint({
+        contentRef: componentRef,
+        documentTitle: `Bao_cao_tong_ket_${new Date().toISOString().slice(0, 10)}`,
+        onAfterPrint: () => toast.success("Đã xuất file PDF thành công"),
+    });
+
+    const onPrintClick = () => {
+        if (!componentRef.current) {
+            toast.error("Không có dữ liệu để in danh sách");
+            return;
+        }
+        handlePrint();
+    };
+
     return (
         <div className="mx-auto w-full max-w-6xl space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Tổng hợp Báo cáo & Đánh giá</h1>
+                    <h1 className="text-2xl font-bold text-slate-900">Báo cáo tổng kết thực tập</h1>
                     <p className="text-sm text-slate-500">Giám sát kết quả thực tập của tất cả thực tập sinh</p>
                 </div>
             </div>
@@ -75,6 +91,12 @@ export default function HrReportsPage() {
                     className="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-colors"
                 >
                     <Download className="h-4 w-4" /> Xuất Excel
+                </button>
+                <button
+                    onClick={onPrintClick}
+                    className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+                >
+                    <Printer className="h-4 w-4" /> Xuất PDF
                 </button>
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -95,53 +117,57 @@ export default function HrReportsPage() {
                 ) : filteredReports.length === 0 ? (
                     <div className="py-12 text-center text-sm text-slate-600">Không tìm thấy dữ liệu.</div>
                 ) : (
-                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-50 font-semibold text-slate-900">
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" ref={componentRef}>
+                        <div className="hidden print:block p-4 text-center">
+                            <h1 className="text-2xl font-bold">BÁO CÁO TỔNG KẾT THỰC TẬP</h1>
+                            <p className="text-sm text-slate-500">Ngày xuất: {new Date().toLocaleDateString("vi-VN")}</p>
+                        </div>
+                        <table className="w-full text-left text-sm print:border print:border-slate-300">
+                            <thead className="bg-slate-50 font-semibold text-slate-900 print:bg-slate-100">
                                 <tr>
-                                    <th className="px-4 py-3">Thực tập sinh</th>
-                                    <th className="px-4 py-3">Trường / Chuyên ngành</th>
-                                    <th className="px-4 py-3">Mentor</th>
-                                    <th className="px-4 py-3 text-center">Báo cáo tuần</th>
-                                    <th className="px-4 py-3 text-center">Điểm TB</th>
-                                    <th className="px-4 py-3">Xếp loại</th>
-                                    <th className="px-4 py-3 text-right">Chi tiết</th>
+                                    <th className="px-4 py-3 border-b border-slate-200">Thực tập sinh</th>
+                                    <th className="px-4 py-3 border-b border-slate-200">Trường / Chuyên ngành</th>
+                                    <th className="px-4 py-3 border-b border-slate-200">Mentor</th>
+                                    <th className="px-4 py-3 border-b border-slate-200 text-center">Báo cáo</th>
+                                    <th className="px-4 py-3 border-b border-slate-200 text-center">Điểm TB</th>
+                                    <th className="px-4 py-3 border-b border-slate-200">Xếp loại</th>
+                                    <th className="px-4 py-3 border-b border-slate-200 text-right print:hidden">Chi tiết</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredReports.map((item) => (
-                                    <tr key={item.internId} className="hover:bg-slate-50">
-                                        <td className="px-4 py-3">
+                                    <tr key={item.internId} className="hover:bg-slate-50 print:hover:bg-white">
+                                        <td className="px-4 py-3 print:border-b print:border-slate-200">
                                             <div className="font-medium text-slate-900">{item.fullName}</div>
                                             <div className="text-xs text-slate-500">{item.studentCode}</div>
                                         </td>
-                                        <td className="px-4 py-3 text-slate-600">
+                                        <td className="px-4 py-3 text-slate-600 print:border-b print:border-slate-200">
                                             <div>{item.university}</div>
                                             <div className="text-xs text-slate-400">{item.major}</div>
                                         </td>
-                                        <td className="px-4 py-3 text-slate-600">{item.mentorName}</td>
-                                        <td className="px-4 py-3 text-center text-slate-600">{item.reportCount}</td>
-                                        <td className="px-4 py-3 text-center font-bold text-indigo-600">
+                                        <td className="px-4 py-3 text-slate-600 print:border-b print:border-slate-200">{item.mentorName}</td>
+                                        <td className="px-4 py-3 text-center text-slate-600 print:border-b print:border-slate-200">{item.reportCount}</td>
+                                        <td className="px-4 py-3 text-center font-bold text-indigo-600 print:border-b print:border-slate-200">
                                             {item.finalScore > 0 ? item.finalScore : "-"}
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3 print:border-b print:border-slate-200">
                                             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${!item.finalAssessment || item.finalAssessment === "Chưa đánh giá"
-                                                ? "bg-slate-100 text-slate-600"
+                                                ? "bg-slate-100 text-slate-600 print:bg-transparent print:text-black"
                                                 : item.finalAssessment === "Xuất sắc" || item.finalAssessment === "Giỏi"
-                                                    ? "bg-emerald-50 text-emerald-700"
+                                                    ? "bg-emerald-50 text-emerald-700 print:bg-transparent print:text-black"
                                                     : item.finalAssessment === "Yếu"
-                                                        ? "bg-red-50 text-red-700"
-                                                        : "bg-blue-50 text-blue-700"
+                                                        ? "bg-red-50 text-red-700 print:bg-transparent print:text-black"
+                                                        : "bg-blue-50 text-blue-700 print:bg-transparent print:text-black"
                                                 }`}>
                                                 {item.finalAssessment}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-right">
+                                        <td className="px-4 py-3 text-right print:hidden">
                                             <Link
                                                 to={`/hr/reports/final/${item.internId}`}
                                                 className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors"
                                             >
-                                                <FileText className="h-3.5 w-3.5" /> Xem báo cáo
+                                                <FileText className="h-3.5 w-3.5" /> Xem
                                             </Link>
                                         </td>
                                     </tr>

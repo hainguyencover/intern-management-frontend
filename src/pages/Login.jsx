@@ -1,9 +1,9 @@
-import React, {useState} from "react";
-import {useAuth} from "../auth/AuthContext";
-import {useNavigate, Link} from "react-router-dom";
+import React, { useState } from "react";
+import { useAuth } from "../auth/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
-    const {login, loading} = useAuth();
+    const { login, loading } = useAuth();
     const nav = useNavigate();
     const [email, setEmail] = useState("hr@company.com");
     const [password, setPassword] = useState("hr123");
@@ -17,7 +17,7 @@ export default function Login() {
         e.preventDefault();
         setErr("");
         try {
-            const u = await login({email, password});
+            const u = await login({ email, password });
             const roles = u?.roles || [];
             if (roles.includes("ADMIN")) nav("/dashboard/admin");
             else if (roles.includes("HR")) nav("/dashboard/hr");
@@ -36,6 +36,50 @@ export default function Login() {
             >
                 <h2 className="text-xl font-extrabold text-slate-900">Login</h2>
                 <p className="mt-1 text-sm text-slate-500">Welcome back. Please sign in to continue.</p>
+
+                {/* Quick Login Buttons (Dev/Demo Only) */}
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setEmail("admin@company.com");
+                            setPassword("admin123");
+                        }}
+                        className="rounded-lg bg-slate-100 px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 transition"
+                    >
+                        Admin
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setEmail("hr@company.com");
+                            setPassword("hr123");
+                        }}
+                        className="rounded-lg bg-purple-100 px-2 py-1.5 text-xs font-medium text-purple-700 hover:bg-purple-200 transition"
+                    >
+                        HR
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setEmail("mentor2@company.com"); // Updated to mentor2
+                            setPassword("mentor123");
+                        }}
+                        className="rounded-lg bg-orange-100 px-2 py-1.5 text-xs font-medium text-orange-700 hover:bg-orange-200 transition"
+                    >
+                        Mentor
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setEmail("intern@student.com");
+                            setPassword("intern123");
+                        }}
+                        className="rounded-lg bg-blue-100 px-2 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition"
+                    >
+                        Intern
+                    </button>
+                </div>
 
                 <div className="mt-5 space-y-4">
                     <div className="space-y-1.5">

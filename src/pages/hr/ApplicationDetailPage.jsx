@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import StatusBadge from "../../components/StatusBadge";
 import DecisionModal from "../../components/DecisionModal";
 import { toast } from "sonner";
-import {internApi as applicationApi} from "../../api/internApi.js";
+import { documentApi as applicationApi } from "../../api/applicationApi.js";
 
 export default function ApplicationDetailPage() {
     const { id } = useParams();
@@ -15,7 +15,7 @@ export default function ApplicationDetailPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const res = await applicationApi.getById(id);
+            const res = await applicationApi.getApplicationDetail(id);
             setApp(res.data);
         } catch (err) {
             toast.error("Không thể tải chi tiết hồ sơ");
@@ -32,7 +32,7 @@ export default function ApplicationDetailPage() {
 
     const handleReview = async (payload) => {
         try {
-            await applicationApi.review(id, payload);
+            await applicationApi.reviewApplication(id, payload);
             toast.success(
                 payload.decision === "APPROVE" ? "Đã duyệt hồ sơ" : "Đã từ chối hồ sơ"
             );
@@ -74,8 +74,8 @@ export default function ApplicationDetailPage() {
                     <div className="mt-2 flex items-center gap-2">
                         <StatusBadge status={app.status} />
                         <span className="text-sm text-slate-600">
-              Intern ID: {app.internId || "-"}
-            </span>
+                            Intern ID: {app.internId || "-"}
+                        </span>
                     </div>
                 </div>
 
@@ -109,8 +109,8 @@ export default function ApplicationDetailPage() {
                         <div className="flex justify-between gap-3">
                             <span className="text-slate-500">Ngày nộp</span>
                             <span className="font-medium">
-                {app.appliedAt ? new Date(app.appliedAt).toLocaleString() : "-"}
-              </span>
+                                {app.appliedAt ? new Date(app.appliedAt).toLocaleString() : "-"}
+                            </span>
                         </div>
                         <div className="pt-2">
                             <div className="text-slate-500">Ghi chú</div>

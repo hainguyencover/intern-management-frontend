@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { programService } from "../../services/programService";
 import { departmentApi } from "../../api/departmentApi";
 import { toast } from "sonner";
-import { Pencil } from "lucide-react";
+import { Pencil, MoreHorizontal } from "lucide-react";
+import { Dropdown } from "antd";
 
 export default function Programs() {
     const [programs, setPrograms] = useState([]);
@@ -79,13 +80,23 @@ export default function Programs() {
         setShowModal(true);
     };
 
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            await programService.updateStatus(id, newStatus);
+            toast.success("Cập nhật trạng thái thành công");
+            fetchPrograms();
+        } catch (error) {
+            toast.error("Không thể cập nhật trạng thái");
+        }
+    };
+
     const resetForm = () => {
         setEditingProgram(null);
         setForm({ name: "", departmentId: "", description: "", startDate: "", endDate: "" });
     };
 
     return (
-        <div className="mx-auto w-full max-w-6xl space-y-4">
+        <div className="mx-auto w-full max-w-full px-6 space-y-4">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold">Chương trình thực tập</h1>
                 <button
@@ -135,11 +146,41 @@ export default function Programs() {
                                         <td className="px-4 py-3 text-right">
                                             <button
                                                 onClick={() => openEdit(p)}
-                                                className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                                                className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors mr-2"
                                                 title="Sửa"
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
+                                            <Dropdown
+                                                menu={{
+                                                    items: [
+                                                        {
+                                                            key: 'ACTIVE',
+                                                            label: 'Kích hoạt',
+                                                            disabled: p.status === 'ACTIVE',
+                                                            onClick: () => handleStatusChange(p.id, 'ACTIVE')
+                                                        },
+                                                        {
+                                                            key: 'CLOSED',
+                                                            label: 'Đóng chương trình',
+                                                            disabled: p.status === 'CLOSED',
+                                                            danger: true,
+                                                            onClick: () => handleStatusChange(p.id, 'CLOSED')
+                                                        },
+                                                        {
+                                                            key: 'DRAFT',
+                                                            label: 'Chuyển về nháp',
+                                                            disabled: p.status === 'DRAFT' || p.status === 'CLOSED',
+                                                            onClick: () => handleStatusChange(p.id, 'DRAFT')
+                                                        }
+                                                    ]
+                                                }}
+                                                trigger={['click']}
+                                            >
+                                                <button className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </button>
+                                            </Dropdown>
                                         </td>
                                     </tr>
                                 );

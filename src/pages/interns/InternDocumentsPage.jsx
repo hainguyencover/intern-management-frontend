@@ -40,9 +40,9 @@ export default function InternDocumentsPage() {
             key: "upload",
             label: "Tải lên tài liệu",
             children: (
-                <Space direction="vertical" size="large" className="w-full">
+                <div className="flex flex-col w-full gap-6">
                     <DocumentUploader type="CV" onUploadSuccess={loadDocuments} />
-                </Space>
+                </div>
             ),
         },
         {
