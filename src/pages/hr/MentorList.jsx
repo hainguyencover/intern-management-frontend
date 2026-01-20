@@ -1,120 +1,162 @@
-import React, { useEffect, useMemo, useState } from "react";
-
-import { mentorApi } from "../../api/mentorApi";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Pagination from "../../components/Pagination";
 import { toast } from "sonner";
+import { adminUserApi } from "../../api/adminApi";
+import { mentorApi } from "../../api/mentorApi";
+
+// If there is no specific mentorApi for HR, we might use adminUserApi with role filter
+// OR we should check if there is a mentorApi. based on file list, there is 'mentor' dir in pages but maybe not in api.
+// src/api has: internApi, documentApi, programGroupService...
+// Let's assume we use adminUserApi.getUsers({ role: 'MENTOR' }) for now.
+
+import CreateMentor from "./CreateMentor";
 
 export default function MentorList() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [filters, setFilters] = useState({
+        role: "MENTOR",
+        keyword: "",
+        page: 0,
+        size: 10,
+    });
 
-    const [mentors, setMentors] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
-
-    const fetchList = async () => {
-        setLoading(true);
+    const fetchData = async () => {
         try {
-            const data = await mentorApi.list();
-            const list = Array.isArray(data) ? data : (data.content || []);
-            setMentors(list);
-        } catch (e) {
-            console.error(e);
-            toast.error("Failed to load mentors");
+            setLoading(true);
+            const res = await mentorApi.list(filters);
+            setData(res.data);
+        } catch (err) {
+            toast.error("Không thể tải danh sách Mentor");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchList();
-    }, []);
+        fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.page]);
 
-    const filtered = useMemo(() => {
-        if (!search.trim()) return mentors;
-        const lower = search.toLowerCase();
-        return mentors.filter(
-            (m) =>
-                m.fullName?.toLowerCase().includes(lower) ||
-                m.email?.toLowerCase().includes(lower) ||
-                m.departmentName?.toLowerCase().includes(lower)
-        );
-    }, [mentors, search]);
-
-
+    const handleSearch = () => {
+        setFilters({ ...filters, page: 0 });
+        fetchData();
+    };
 
     return (
-        <div className="mx-auto w-full max-w-6xl p-5">
-            {/* Header */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mx-auto w-full max-w-6xl space-y-4">
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
-                        Mentors
-                    </h1>
-                    <p className="mt-1 text-sm text-slate-500">
-                        Manage mentors and their department assignments.
-                    </p>
+                    <h1 className="text-2xl font-bold">Quản lý Mentor</h1>
+                    <p className="mt-1 text-sm text-slate-600">Danh sách giảng viên hướng dẫn</p>
                 </div>
-
-
+                <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                    + Thêm Mentor
+                </button>
             </div>
 
-            <div className="h-4" />
+            {/* Filters */}
+            <div className="rounded-2xl border bg-white p-4">
+                <div className="flex gap-3">
+                    <input
+                        className="flex-1 rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
+                        placeholder="Tìm kiếm Mentor (tên, email)..."
+                        value={filters.keyword}
+                        onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    />
+                    <button
+                        onClick={handleSearch}
+                        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                    >
+                        Tìm kiếm
+                    </button>
+                </div>
+            </div>
 
-            {/* Filter */}
-            <div className="mb-4">
-                <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search by name, email, department..."
-                    className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            {/* Table */}
+            <div className="overflow-hidden rounded-2xl border bg-white">
+                <table className="min-w-full text-left text-sm">
+                    <thead className="bg-slate-50 text-xs uppercase text-slate-600">
+                        <tr>
+                            <th className="px-4 py-3">ID</th>
+                            <th className="px-4 py-3">Họ tên</th>
+                            <th className="px-4 py-3">Email</th>
+                            <th className="px-4 py-3">SL Intern</th>
+                            {/* Department? */}
+                            <th className="px-4 py-3 text-right">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                        {loading && (
+                            <tr>
+                                <td colSpan={5} className="px-4 py-6 text-center text-slate-600">
+                                    Đang tải...
+                                </td>
+                            </tr>
+                        )}
+                        {!loading && (!data?.content || data.content.length === 0) && (
+                            <tr>
+                                <td colSpan={5} className="px-4 py-6 text-center text-slate-600">
+                                    Không có dữ liệu
+                                </td>
+                            </tr>
+                        )}
+                        {!loading && data?.content?.map((item) => {
+                            // MentorResponse does not have active/status field if simpler.
+                            // But usually backend response should consistent. 
+                            // MentorResponse has userId, email, fullName, title, internCount.
+                            // Status is on User entity. MentorResponse doesn't have status field?
+                            // Let's check MentorResponse.java
+                            // It does NOT have status. So we can't show Active/Locked here unless we add it. I'll omit status column for now unless needed.
+                            return (
+                                <tr key={item.id} className="hover:bg-slate-50">
+                                    <td className="px-4 py-3 font-medium">{item.id}</td>
+                                    <td className="px-4 py-3">
+                                        <div>{item.fullName}</div>
+                                        <div className="text-xs text-slate-500">{item.title}</div>
+                                    </td>
+                                    <td className="px-4 py-3">{item.email}</td>
+                                    <td className="px-4 py-3">
+                                        <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+                                            {item.internCount || 0}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        <Link
+                                            to={`/hr/mentors/${item.id}`}
+                                            className="text-blue-600 hover:underline"
+                                        >
+                                            Chi tiết & Gán Intern
+                                        </Link>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+
+                <Pagination
+                    current={filters.page}
+                    total={data?.totalElements || 0}
+                    pageSize={filters.size}
+                    onChange={(page) => setFilters({ ...filters, page })}
                 />
             </div>
 
-            {/* List */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                {loading ? (
-                    <div className="p-8 text-center text-sm text-slate-500">Loading...</div>
-                ) : filtered.length === 0 ? (
-                    <div className="p-8 text-center text-sm text-slate-500">
-                        No mentors found.
-                    </div>
-                ) : (
-                    <div className="w-full overflow-x-auto">
-                        <table className="w-full min-w-[800px] border-collapse text-left text-sm">
-                            <thead className="bg-slate-50">
-                                <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-500">
-                                    <th className="px-4 py-3">Full Name</th>
-                                    <th className="px-4 py-3">Email</th>
-                                    <th className="px-4 py-3">Phone</th>
-                                    <th className="px-4 py-3">Department</th>
-
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {filtered.map((m) => (
-                                    <tr key={m.id} className="hover:bg-slate-50">
-                                        <td className="px-4 py-3 font-semibold text-slate-900">
-                                            {m.fullName}
-                                        </td>
-                                        <td className="px-4 py-3 text-slate-600">{m.email}</td>
-                                        <td className="px-4 py-3 text-slate-600">
-                                            {m.phone || "---"}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            {m.departmentName ? (
-                                                <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
-                                                    {m.departmentName}
-                                                </span>
-                                            ) : (
-                                                <span className="text-slate-400 italic">---</span>
-                                            )}
-                                        </td>
-
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
+            {isCreateModalOpen && (
+                <CreateMentor
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onSuccess={() => {
+                        fetchData();
+                    }}
+                />
+            )}
         </div>
     );
 }

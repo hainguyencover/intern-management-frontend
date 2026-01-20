@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {toast} from "sonner";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../StatusBadge.jsx";
 import {internDocumentApi} from "../../api/internDocumentApi.js";
 
 export default function HrInternDocuments({internId, hrUserId}) {

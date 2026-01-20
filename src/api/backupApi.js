@@ -5,5 +5,5 @@ export const backupApi = {
     runBackup: () => axiosClient.post('api/admin/system/backup'),
 
     // Get backup history
-    getBackupHistory: () => axiosClient.get('api/admin/system/backup/history'),
+    getBackupHistory: (params) => axiosClient.get('api/admin/system/backups', { params }),
 };

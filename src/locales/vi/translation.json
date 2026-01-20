@@ -1,0 +1,32 @@
+{
+    "common": {
+        "welcome": "Xin chào",
+        "login": "Đăng nhập",
+        "logout": "Đăng xuất",
+        "dashboard": "Bảng điều khiển",
+        "profile": "Hồ sơ",
+        "settings": "Cài đặt",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "edit": "Sửa",
+        "delete": "Xóa",
+        "search": "Tìm kiếm...",
+        "loading": "Đang tải...",
+        "error": "Lỗi",
+        "success": "Thành công"
+    },
+    "sidebar": {
+        "dashboard": "Bảng điều khiển",
+        "interns": "Thực tập sinh",
+        "mentors": "Người hướng dẫn",
+        "programs": "Chương trình",
+        "tasks": "Công việc",
+        "system_config": "Cấu hình hệ thống"
+    },
+    "dashboard": {
+        "total_interns": "Tổng thực tập sinh",
+        "total_mentors": "Tổng Mentor",
+        "active_groups": "Nhóm hoạt động",
+        "completion_rate": "Tỷ lệ hoàn thành"
+    }
+}

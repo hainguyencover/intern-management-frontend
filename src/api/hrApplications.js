@@ -1,9 +1,10 @@
 import axios from "./axiosClient";
 
-export const hrListApplications = async ({page = 0, size = 10, status = ""}) => {
-    const params = {page, size};
+export const hrListApplications = async ({ page = 0, size = 10, status = "", q = "" }) => {
+    const params = { page, size };
     if (status) params.status = status;
-    const res = await axios.get("/api/hr/applications", {params});
+    if (q) params.q = q;
+    const res = await axios.get("/api/hr/applications", { params });
     return res.data;
 };
 

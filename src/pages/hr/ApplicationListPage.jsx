@@ -1,108 +1,146 @@
-import {useEffect, useState} from "react";
-import {hrListApplications} from "../../api/hrApplications";
-import {Link} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import StatusBadge from "../../components/StatusBadge";
+import Pagination from "../../components/Pagination";
+import { toast } from "sonner";
+import { hrListApplications } from "../../api/hrApplications";
 
-const STATUS = ["", "SUBMITTED", "APPROVED", "REJECTED", "DRAFT"];
+const STATUS_OPTIONS = ["", "DRAFT", "SUBMITTED", "APPROVED", "REJECTED"];
 
 export default function ApplicationListPage() {
-    const [status, setStatus] = useState("SUBMITTED");
-    const [page, setPage] = useState(0);
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [filters, setFilters] = useState({
+        status: "SUBMITTED",
+        q: "",
+        page: 0,
+        size: 10,
+    });
 
-    const load = async () => {
-        setLoading(true);
+    const fetchData = async () => {
         try {
-            const res = await hrListApplications({page, size: 10, status});
-            setData(res);
+            setLoading(true);
+            const data = await hrListApplications(filters);
+            setData(data);
+        } catch (err) {
+            toast.error("Không thể tải danh sách hồ sơ");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        load();
-    }, [status, page]);
+        fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.page, filters.status]);
+
+    const handleSearch = () => {
+        setFilters({ ...filters, page: 0 });
+        fetchData();
+    };
 
     return (
-        <div className="p-6 space-y-4">
-            <div className="flex items-center justify-between">
-                <h1 className="text-xl font-semibold">Applications</h1>
-
-                <select
-                    value={status}
-                    onChange={(e) => {
-                        setPage(0);
-                        setStatus(e.target.value);
-                    }}
-                    className="h-10 px-3 rounded-lg border border-slate-200"
-                >
-                    {STATUS.map(s => (
-                        <option key={s} value={s}>
-                            {s || "ALL"}
-                        </option>
-                    ))}
-                </select>
+        <div className="mx-auto w-full max-w-6xl space-y-4">
+            <div>
+                <h1 className="text-2xl font-bold">Hồ sơ ứng tuyển</h1>
+                <p className="mt-1 text-sm text-slate-600">Duyệt hoặc từ chối hồ sơ ứng viên</p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 overflow-hidden">
-                <table className="w-full text-sm">
-                    <thead className="bg-slate-50">
-                    <tr>
-                        <th className="text-left p-3">Intern</th>
-                        <th className="text-left p-3">Email</th>
-                        <th className="text-left p-3">Position</th>
-                        <th className="text-left p-3">Applied At</th>
-                        <th className="text-left p-3">Status</th>
-                        <th className="text-left p-3">Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {loading && (
-                        <tr>
-                            <td className="p-3" colSpan={6}>Loading...</td>
-                        </tr>
-                    )}
-                    {!loading && data?.content?.map(row => (
-                        <tr key={row.id} className="border-t">
-                            <td className="p-3">{row.internName}</td>
-                            <td className="p-3">{row.internEmail}</td>
-                            <td className="p-3">{row.position || "-"}</td>
-                            <td className="p-3">{row.appliedAt ? new Date(row.appliedAt).toLocaleString() : "-"}</td>
-                            <td className="p-3">{row.status}</td>
-                            <td className="p-3">
-                                <Link className="underline" to={`/hr/applications/${row.id}`}>View</Link>
-                            </td>
-                        </tr>
-                    ))}
-                    {!loading && (!data?.content || data.content.length === 0) && (
-                        <tr>
-                            <td className="p-3" colSpan={6}>No data</td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-            </div>
+            {/* Filters */}
+            <div className="rounded-2xl border bg-white p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                    <select
+                        value={filters.status}
+                        onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 0 })}
+                        className="h-10 rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-slate-200"
+                    >
+                        {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>
+                                {s || "ALL"}
+                            </option>
+                        ))}
+                    </select>
 
-            {data && (
-                <div className="flex items-center gap-2">
+                    <input
+                        value={filters.q}
+                        onChange={(e) => setFilters({ ...filters, q: e.target.value })}
+                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                        className="h-10 flex-1 rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-slate-200"
+                        placeholder="Tìm theo tên/email/vị trí..."
+                    />
+
                     <button
-                        disabled={data.first}
-                        onClick={() => setPage(p => Math.max(0, p - 1))}
-                        className="px-3 h-9 rounded-lg border disabled:opacity-50"
+                        onClick={handleSearch}
+                        className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800"
                     >
-                        Prev
-                    </button>
-                    <div className="text-sm">Page {data.number + 1} / {data.totalPages}</div>
-                    <button
-                        disabled={data.last}
-                        onClick={() => setPage(p => p + 1)}
-                        className="px-3 h-9 rounded-lg border disabled:opacity-50"
-                    >
-                        Next
+                        Tìm
                     </button>
                 </div>
-            )}
+            </div>
+
+            {/* Table */}
+            <div className="overflow-hidden rounded-2xl border bg-white">
+                <table className="min-w-full text-left text-sm">
+                    <thead className="bg-slate-50 text-xs uppercase text-slate-600">
+                        <tr>
+                            <th className="px-4 py-3">ID</th>
+                            <th className="px-4 py-3">Ứng viên</th>
+                            <th className="px-4 py-3">Vị trí</th>
+                            <th className="px-4 py-3">Ngày nộp</th>
+                            <th className="px-4 py-3">Trạng thái</th>
+                            <th className="px-4 py-3 text-right">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                        {loading && (
+                            <tr>
+                                <td colSpan={6} className="px-4 py-6 text-center text-slate-600">
+                                    Đang tải...
+                                </td>
+                            </tr>
+                        )}
+                        {!loading && (!data?.content || data.content.length === 0) && (
+                            <tr>
+                                <td colSpan={6} className="px-4 py-6 text-center text-slate-600">
+                                    Không có dữ liệu
+                                </td>
+                            </tr>
+                        )}
+                        {!loading &&
+                            data?.content?.map((app) => (
+                                <tr key={app.id} className="hover:bg-slate-50">
+                                    <td className="px-4 py-3 font-medium">{app.id}</td>
+                                    <td className="px-4 py-3">
+                                        <div className="font-semibold text-slate-900">{app.candidateName || "-"}</div>
+                                        <div className="text-xs text-slate-600">{app.candidateEmail || "-"}</div>
+                                    </td>
+                                    <td className="px-4 py-3">{app.position || "-"}</td>
+                                    <td className="px-4 py-3">
+                                        {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : "-"}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <StatusBadge status={app.status} />
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        <Link
+                                            to={`/hr/applications/${app.id}`}
+                                            className="text-sm font-semibold text-blue-600 hover:underline"
+                                        >
+                                            Chi tiết
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                    </tbody>
+                </table>
+
+                <Pagination
+                    current={filters.page}
+                    total={data?.totalElements || 0}
+                    pageSize={filters.size}
+                    onChange={(page) => setFilters({ ...filters, page })}
+                />
+            </div>
         </div>
     );
 }

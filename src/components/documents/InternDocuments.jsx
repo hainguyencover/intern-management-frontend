@@ -1,8 +1,8 @@
-import {useEffect, useMemo, useState} from "react";
-import {toast} from "sonner";
-import StatusBadge from "./StatusBadge";
-import {internDocumentApi} from "../../api/internDocumentApi.js";
-import {useAuth} from "../../auth/AuthContext";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import StatusBadge from "../StatusBadge.jsx";
+import { internDocumentApi } from "../../api/internDocumentApi.js";
+import { useAuth } from "../../auth/AuthContext";
 
 const TYPE_LABEL = {
     CV: "CV",
@@ -19,11 +19,11 @@ function pickLatestByType(docs = []) {
     return map;
 }
 
-export default function InternDocuments({internId}) {
+export default function InternDocuments({ internId }) {
     const [docs, setDocs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [uploadingType, setUploadingType] = useState(null);
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     const byType = useMemo(() => pickLatestByType(docs), [docs]);
 
@@ -74,8 +74,8 @@ export default function InternDocuments({internId}) {
         if (!file || !validateFile(file)) return;
         setUploadingType(type);
         try {
-            // Call API without internId; backend infers user from token
-            await internDocumentApi.uploadDocument({type, file});
+            // Call API with optional internId (required if user is HR/ADMIN)
+            await internDocumentApi.uploadDocument({ type, file, internId });
             toast.success("Upload tài liệu thành công.");
             await load();
         } catch (e) {
@@ -124,7 +124,7 @@ export default function InternDocuments({internId}) {
     };
 
 
-    const Card = ({type}) => {
+    const Card = ({ type }) => {
         const d = byType.get(type);
         const isUploading = uploadingType === type;
 
@@ -137,7 +137,7 @@ export default function InternDocuments({internId}) {
                             {d?.uploadedAt ? `Upload: ${new Date(d.uploadedAt).toLocaleString()}` : "Chưa upload"}
                         </div>
                     </div>
-                    <StatusBadge status={d?.status}/>
+                    <StatusBadge status={d?.status} />
                 </div>
 
                 <div className="mt-3 rounded-xl bg-slate-50 p-3">
@@ -207,8 +207,8 @@ export default function InternDocuments({internId}) {
             </div>
 
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Card type="CV"/>
-                <Card type="APPLICATION_LETTER"/>
+                <Card type="CV" />
+                <Card type="APPLICATION_LETTER" />
             </div>
         </section>
     );

@@ -1,0 +1,32 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "login": "Login",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search...",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "interns": "Interns",
+    "mentors": "Mentors",
+    "programs": "Programs",
+    "tasks": "Tasks",
+    "system_config": "System Config"
+  },
+  "dashboard": {
+    "total_interns": "Total Interns",
+    "total_mentors": "Total Mentors",
+    "active_groups": "Active Groups",
+    "completion_rate": "Completion Rate"
+  }
+}

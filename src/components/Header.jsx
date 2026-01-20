@@ -1,9 +1,10 @@
 import React from "react";
-import {useAuth} from "../auth/AuthContext";
-import {Button} from "antd";
+import { useAuth } from "../auth/AuthContext";
+import NotificationBell from "./common/NotificationBell";
+import { Button } from "antd";
 
 export default function Header() {
-    const {user, logout} = useAuth();
+    const { user, logout } = useAuth();
     const name = user?.fullName || user?.email || "User";
     const roles = (user?.roles || []).join(", ");
 
@@ -13,14 +14,18 @@ export default function Header() {
                 Intern Management
             </div>
 
-            <div className="flex items-center gap-3">
-                <div className="text-right">
-                    <div className="text-sm font-semibold text-slate-900">{name}</div>
-                    <div className="text-xs text-slate-500">{roles}</div>
+            <div className="flex items-center gap-4">
+                <NotificationBell />
+
+                <div className="flex items-center gap-3">
+                    <div className="text-right">
+                        <div className="text-sm font-semibold text-slate-900">{name}</div>
+                        <div className="text-xs text-slate-500">{roles}</div>
+                    </div>
+                    <Button variant="secondary" onClick={logout}>
+                        Logout
+                    </Button>
                 </div>
-                <Button variant="secondary" onClick={logout}>
-                    Logout
-                </Button>
             </div>
         </header>
     );

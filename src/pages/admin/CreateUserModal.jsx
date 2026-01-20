@@ -1,7 +1,7 @@
 // src/pages/admin/CreateUserModal.jsx
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import {adminUserApi} from "../../api/adminApi.js";
+import { adminUserApi } from "../../api/adminApi.js";
 
 export default function CreateUserModal({ onClose, onSuccess }) {
     const [formData, setFormData] = useState({
@@ -97,6 +97,19 @@ export default function CreateUserModal({ onClose, onSuccess }) {
                                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                 className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                                 placeholder="Nguyễn Văn A"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-1 block text-sm font-semibold text-slate-900">
+                                Mật khẩu <span className="text-slate-400 font-normal">(Tùy chọn)</span>
+                            </label>
+                            <input
+                                type="password"
+                                value={formData.password || ''}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                                placeholder="Để trống sẽ tự sinh mật khẩu"
                             />
                         </div>
                     </div>
