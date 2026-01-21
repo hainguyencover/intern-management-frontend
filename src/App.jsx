@@ -35,6 +35,10 @@ import MySchedule from "./pages/interns/MySchedule";
 import Groups from "./pages/hr/Groups";
 import Mentors from "./pages/hr/Mentors";
 
+import HrSupportTicketsPage from "./pages/hr/HrSupportTicketsPage";
+import InternSupportTicketsPage from "./pages/interns/InternSupportTicketsPage";
+
+
 function Unauthorized() {
     return (
         <div style={{ padding: 24 }}>
@@ -88,6 +92,9 @@ function AppContent() {
                             <Route path="/hr/interns/:internId" element={<InternDetail />} />
 
                             <Route path="/hr/applications" element={<ApplicationListPage />} />
+
+                            <Route path="/hr/support-tickets" element={<HrSupportTicketsPage />} />
+
                             <Route
                                 path="/hr/applications/:id"
                                 element={<ApplicationDetailPage />}
@@ -121,6 +128,9 @@ function AppContent() {
                                 element={<InternContractConfirmPage />}
                             />
                             <Route path="/interns/me/schedule" element={<MySchedule />} />
+
+                            <Route path="/intern/support-tickets" element={<InternSupportTicketsPage />} />
+
                         </Route>
                     </Route>
                 </Route>

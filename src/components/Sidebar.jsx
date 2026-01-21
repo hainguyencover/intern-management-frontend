@@ -38,6 +38,8 @@ export default function Sidebar() {
             { label: "Programs", to: "/hr/programs" },
             { label: "Groups", to: "/hr/groups" },
             { label: "Mentors", to: "/hr/mentors" },
+            { label: "Support Tickets", to: "/hr/support-tickets" },
+
 
         ];
         const mentor = [
@@ -50,6 +52,8 @@ export default function Sidebar() {
             {label: "Hồ sơ ứng tuyển", to: "/intern/applications"},
             {label: "Hợp đồng", to: "/intern/contracts"},
             { label: "My Schedule", to: "/interns/me/schedule" },
+            { label: "Support Tickets", to: "/intern/support-tickets" },
+
         ];
 
         return [
