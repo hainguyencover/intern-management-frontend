@@ -72,18 +72,7 @@ export default function InternDashboard() {
             </div>
 
             <Row gutter={[16, 16]}>
-                {/* Progress Cards */}
-                <Col xs={24} md={12} lg={8}>
-                    <Card title="Tiến độ thực tập" className="h-full border-slate-200">
-                        <div className="text-center py-4">
-                            <Progress type="dashboard" percent={internshipProgress} strokeColor="#1677ff" />
-                            <div className="mt-2">
-                                <p className="text-2xl font-bold">{displayStats.daysInternship} / {displayStats.totalDays}</p>
-                                <p className="text-slate-500">Ngày làm việc</p>
-                            </div>
-                        </div>
-                    </Card>
-                </Col>
+
 
                 <Col xs={24} md={12} lg={8}>
                     <Card title="Công việc tuần này" className="h-full border-slate-200">

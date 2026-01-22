@@ -26,7 +26,6 @@ export const CONTRACT_STATUS = {
 };
 
 export const PROGRAM_STATUS = {
-    DRAFT: "DRAFT",
     ACTIVE: "ACTIVE",
     CLOSED: "CLOSED",
 };

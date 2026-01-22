@@ -48,7 +48,7 @@ export default function FinalReportPage() {
             </div>
 
             {/* A4 Page Container */}
-            <div className="mx-auto min-h-[297mm] w-[210mm] bg-white p-[20mm] shadow-xl print:min-h-0 print:w-full print:shadow-none">
+            <div className="mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-[20mm] shadow-xl print:max-w-none print:min-h-0 print:w-full print:p-8 print:shadow-none">
                 {/* Header */}
                 <div className="mb-8 text-center">
                     <h3 className="text-sm uppercase font-semibold text-slate-500">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>

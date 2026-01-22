@@ -69,6 +69,11 @@ export default function WeeklyReportsReviewPage() {
             return;
         }
 
+        if (fb.rating !== "" && (Number(fb.rating) < 0 || Number(fb.rating) > 10)) {
+            toast.warning("Điểm đánh giá phải từ 0 đến 10.");
+            return;
+        }
+
         setSaving(true);
         try {
             const payload = {
@@ -207,11 +212,18 @@ export default function WeeklyReportsReviewPage() {
                     </div>
 
                     <div className="grid gap-1">
-                        <div className="text-xs font-bold text-slate-600">Rating (tuỳ chọn)</div>
+                        <div className="text-xs font-bold text-slate-600">Rating (0-10)</div>
                         <input
                             type="number"
+                            min="0"
+                            max="10"
                             value={fb.rating}
-                            onChange={(e) => setFb((s) => ({ ...s, rating: e.target.value }))}
+                            onChange={(e) => {
+                                let val = e.target.value;
+                                if (Number(val) > 10) val = "10";
+                                if (Number(val) < 0) val = "0";
+                                setFb((s) => ({ ...s, rating: val }));
+                            }}
                             className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
                             placeholder="VD: 8"
                         />

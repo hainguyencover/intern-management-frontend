@@ -9,7 +9,7 @@ export default function Header() {
     const roles = (user?.roles || []).join(", ");
 
     return (
-        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4">
+        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 print:hidden">
             <div className="font-extrabold tracking-tight text-slate-900">
                 Intern Management
             </div>

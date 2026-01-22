@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ProgramForm from "./ProgramForm";
-import {hrGetProgramDetail, hrPublishProgram, hrUpdateProgram} from "../../api/hrProgramsApi.js";
+import { hrGetProgramDetail, hrPublishProgram, hrUpdateProgram } from "../../api/hrProgramsApi.js";
 
 export default function HrProgramEditPage() {
     const { id } = useParams();
@@ -47,9 +47,6 @@ export default function HrProgramEditPage() {
                 <h2>Chi tiết chương trình #{program.id}</h2>
                 <div style={{ display: "flex", gap: 8 }}>
                     <button onClick={() => nav(`/hr/programs/${program.id}/groups`)}>Phân công</button>
-                    {program.status === "DRAFT" && (
-                        <button disabled={submitting} onClick={onPublish}>Publish</button>
-                    )}
                 </div>
             </div>
 

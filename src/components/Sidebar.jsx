@@ -58,7 +58,7 @@ export default function Sidebar() {
 
                     // Documents Section
                     { type: 'header', label: 'Hồ sơ & Tài liệu' },
-                    { label: "Tài liệu (HR)", to: "/hr/documents" },
+                    { label: "Tài liệu (HR)", to: "/hr/documents", end: true },
                     { label: "Hợp đồng thực tập", to: "/hr/documents/contracts" },
 
                     // Reports Section
@@ -124,7 +124,7 @@ export default function Sidebar() {
     }, [user?.roles]);
 
     return (
-        <aside className="border-r border-slate-200 bg-white p-4">
+        <aside className="border-r border-slate-200 bg-white p-4 print:hidden">
             <div className="mb-3 text-sm font-extrabold text-slate-900">Menu</div>
             <nav className="flex flex-col gap-1">
                 {items.map((it, idx) => {
@@ -136,7 +136,7 @@ export default function Sidebar() {
                         );
                     }
                     return (
-                        <NavLink key={`${it.to}-${it.label}`} to={it.to} className={navClass}>
+                        <NavLink key={`${it.to}-${it.label}`} to={it.to} className={navClass} end={it.end}>
                             {it.label}
                         </NavLink>
                     );
