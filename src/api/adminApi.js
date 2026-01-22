@@ -36,6 +36,9 @@ export const adminUserApi = {
   // Reset password
   resetPassword: (id) => axiosClient.post(`api/admin/users/${id}/reset-password`),
 
+  // Delete user
+  deleteUser: (id) => axiosClient.delete(`api/admin/users/${id}`),
+
   // System Configs
   getSystemConfigs: () => axiosClient.get("/api/admin/system/configs"),
   updateSystemConfig: (key, data) => axiosClient.put(`/api/admin/system/configs/${key}`, data),

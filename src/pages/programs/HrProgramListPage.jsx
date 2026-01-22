@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {Calendar, Building2, Plus, Search, Edit2, CheckCircle} from 'lucide-react';
-import {hrListPrograms, hrPublishProgram} from '../../api/hrProgramsApi';
-import {listDepartments} from '../../api/departmentsApi';
-import {toast} from 'sonner';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, Building2, Plus, Search, Edit2, CheckCircle } from 'lucide-react';
+import { hrListPrograms, hrPublishProgram } from '../../api/hrProgramsApi';
+import { listDepartments } from '../../api/departmentsApi';
+import { toast } from 'sonner';
 
-const StatusBadge = ({status}) => {
+const StatusBadge = ({ status }) => {
     const colors = {
         DRAFT: 'bg-gray-100 text-gray-700',
         ACTIVE: 'bg-green-100 text-green-700',
@@ -13,8 +13,8 @@ const StatusBadge = ({status}) => {
     };
     return (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status] || colors.DRAFT}`}>
-      {status}
-    </span>
+            {status}
+        </span>
     );
 };
 
@@ -105,7 +105,7 @@ export default function HrProgramListPage() {
                     onClick={() => navigate('/hr/programs/new')}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                    <Plus className="w-5 h-5"/>
+                    <Plus className="w-5 h-5" />
                     Tạo chương trình mới
                 </button>
             </div>
@@ -114,18 +114,18 @@ export default function HrProgramListPage() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <input
                             type="text"
                             placeholder="Tìm kiếm chương trình..."
                             value={filters.search}
-                            onChange={(e) => setFilters({...filters, search: e.target.value})}
+                            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
                     <select
                         value={filters.departmentId}
-                        onChange={(e) => setFilters({...filters, departmentId: e.target.value})}
+                        onChange={(e) => setFilters({ ...filters, departmentId: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Tất cả phòng ban</option>
@@ -135,11 +135,10 @@ export default function HrProgramListPage() {
                     </select>
                     <select
                         value={filters.status}
-                        onChange={(e) => setFilters({...filters, status: e.target.value})}
+                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Tất cả trạng thái</option>
-                        <option value="DRAFT">Draft</option>
                         <option value="ACTIVE">Active</option>
                         <option value="CLOSED">Closed</option>
                     </select>
@@ -160,17 +159,17 @@ export default function HrProgramListPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredPrograms.map(program => (
                         <div key={program.id}
-                             className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                            className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                             <div className="p-6 space-y-4">
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">
                                         <h3 className="font-semibold text-gray-900 text-lg mb-1">{program.name}</h3>
                                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Building2 className="w-4 h-4"/>
+                                            <Building2 className="w-4 h-4" />
                                             {program.departmentName}
                                         </div>
                                     </div>
-                                    <StatusBadge status={program.status}/>
+                                    <StatusBadge status={program.status} />
                                 </div>
 
                                 <p className="text-sm text-gray-600 line-clamp-2">
@@ -178,7 +177,7 @@ export default function HrProgramListPage() {
                                 </p>
 
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Calendar className="w-4 h-4"/>
+                                    <Calendar className="w-4 h-4" />
                                     {program.startDate ? new Date(program.startDate).toLocaleDateString('vi-VN') : 'N/A'}
                                     {' - '}
                                     {program.endDate ? new Date(program.endDate).toLocaleDateString('vi-VN') : 'N/A'}
@@ -196,17 +195,8 @@ export default function HrProgramListPage() {
                                         className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                         title="Chỉnh sửa"
                                     >
-                                        <Edit2 className="w-4 h-4"/>
+                                        <Edit2 className="w-4 h-4" />
                                     </button>
-                                    {program.status === 'DRAFT' && (
-                                        <button
-                                            onClick={() => handlePublish(program.id)}
-                                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                            title="Publish chương trình"
-                                        >
-                                            <CheckCircle className="w-4 h-4"/>
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -218,15 +208,15 @@ export default function HrProgramListPage() {
             {pagination.totalPages > 1 && (
                 <div className="flex justify-center gap-2">
                     <button
-                        onClick={() => setPagination(prev => ({...prev, page: Math.max(0, prev.page - 1)}))}
+                        onClick={() => setPagination(prev => ({ ...prev, page: Math.max(0, prev.page - 1) }))}
                         disabled={pagination.page === 0}
                         className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                     >
                         Trước
                     </button>
                     <span className="px-4 py-2">
-            Trang {pagination.page + 1} / {pagination.totalPages}
-          </span>
+                        Trang {pagination.page + 1} / {pagination.totalPages}
+                    </span>
                     <button
                         onClick={() => setPagination(prev => ({
                             ...prev,

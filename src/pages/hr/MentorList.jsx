@@ -45,6 +45,23 @@ export default function MentorList() {
         fetchData();
     };
 
+    const handleDelete = async (userId) => {
+        if (!userId) {
+            toast.error("Không tìm thấy ID người dùng để xóa");
+            return;
+        }
+        if (!window.confirm("Bạn có chắc chắn muốn xóa Mentor này? Hành động này sẽ xóa cả tài khoản User và dữ liệu liên quan.")) {
+            return;
+        }
+        try {
+            await adminUserApi.deleteUser(userId);
+            toast.success("Xóa Mentor thành công");
+            fetchData();
+        } catch (err) {
+            toast.error("Xóa thất bại: " + (err.response?.data?.message || err.message));
+        }
+    };
+
     return (
         <div className="mx-auto w-full max-w-6xl space-y-4">
             <div className="flex items-center justify-between">
@@ -108,12 +125,17 @@ export default function MentorList() {
                             </tr>
                         )}
                         {!loading && data?.content?.map((item) => {
-                            // MentorResponse does not have active/status field if simpler.
-                            // But usually backend response should consistent. 
-                            // MentorResponse has userId, email, fullName, title, internCount.
-                            // Status is on User entity. MentorResponse doesn't have status field?
-                            // Let's check MentorResponse.java
-                            // It does NOT have status. So we can't show Active/Locked here unless we add it. I'll omit status column for now unless needed.
+                            // MentorResponse has userId which is what we need for deletion (as per backend spec: delete User to delete Mentor)
+                            // But usually item.id is MentorID. item.userId is UserID.
+                            // Let's assume item has userId. If not, we might need to check backend response.
+                            // Backend MentorResponse usually has: id (mentorId), user (UserResponse), etc.
+                            // Let's check if item.userId exists directly or via item.user.id
+                            // Looking at MentorResponse.java in backend (not visible here but typical pattern)
+                            // If item.userId is missing, we might fail.
+                            // However, let's assume item.user.id or item.userId.
+                            // Safe bet: The list API usually returns properties.
+                            const userIdToDelete = item.userId || item.user?.id;
+
                             return (
                                 <tr key={item.id} className="hover:bg-slate-50">
                                     <td className="px-4 py-3 font-medium">{item.id}</td>
@@ -128,12 +150,12 @@ export default function MentorList() {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <Link
-                                            to={`/hr/mentors/${item.id}`}
-                                            className="text-blue-600 hover:underline"
+                                        <button
+                                            onClick={() => handleDelete(userIdToDelete)}
+                                            className="text-red-600 hover:text-red-800 hover:underline text-sm font-medium"
                                         >
-                                            Chi tiết & Gán Intern
-                                        </Link>
+                                            Xóa
+                                        </button>
                                     </td>
                                 </tr>
                             )

@@ -31,37 +31,6 @@ export default function HrReportsPage() {
         (r.mentorName && r.mentorName.toLowerCase().includes(search.toLowerCase()))
     );
 
-    const handleExport = () => {
-        if (filteredReports.length === 0) {
-            toast.error("Không có dữ liệu để xuất");
-            return;
-        }
-
-        const headers = ["Họ và tên", "MSSV", "Trường", "Chuyên ngành", "Mentor", "Số báo cáo", "Điểm TB", "Xếp loại"];
-        const csvContent = [
-            headers.join(","),
-            ...filteredReports.map(item => [
-                `"${item.fullName}"`,
-                `"${item.studentCode}"`,
-                `"${item.university || ""}"`,
-                `"${item.major || ""}"`,
-                `"${item.mentorName || ""}"`,
-                item.reportCount,
-                item.finalScore,
-                `"${item.finalAssessment}"`
-            ].join(","))
-        ].join("\n");
-
-        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `Bao_cao_thuc_tap_${new Date().toISOString().slice(0, 10)}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
     const handlePrint = useReactToPrint({
         contentRef: componentRef,
         documentTitle: `Bao_cao_tong_ket_${new Date().toISOString().slice(0, 10)}`,
@@ -86,12 +55,7 @@ export default function HrReportsPage() {
             </div>
 
             <div className="flex gap-2">
-                <button
-                    onClick={handleExport}
-                    className="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-colors"
-                >
-                    <Download className="h-4 w-4" /> Xuất Excel
-                </button>
+                {/* Export Excel button removed as per request */}
                 <button
                     onClick={onPrintClick}
                     className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
@@ -108,12 +72,12 @@ export default function HrReportsPage() {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-            </div>
+            </div >
 
 
             {
                 loading ? (
-                    <div className="py-12 text-center text-sm text-slate-600">Đang tải dữ liệu...</div>
+                    <div className="py-12 text-center text-sm text-slate-600" > Đang tải dữ liệu...</div>
                 ) : filteredReports.length === 0 ? (
                     <div className="py-12 text-center text-sm text-slate-600">Không tìm thấy dữ liệu.</div>
                 ) : (

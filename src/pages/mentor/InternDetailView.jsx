@@ -93,31 +93,28 @@ export default function InternDetailView() {
                 <div className="flex gap-6">
                     <button
                         onClick={() => setActiveTab("info")}
-                        className={`border-b-2 pb-3 text-sm font-semibold transition ${
-                            activeTab === "info"
-                                ? "border-blue-600 text-blue-600"
-                                : "border-transparent text-slate-600 hover:text-slate-900"
-                        }`}
+                        className={`border-b-2 pb-3 text-sm font-semibold transition ${activeTab === "info"
+                            ? "border-blue-600 text-blue-600"
+                            : "border-transparent text-slate-600 hover:text-slate-900"
+                            }`}
                     >
                         Thông tin
                     </button>
                     <button
                         onClick={() => setActiveTab("tasks")}
-                        className={`border-b-2 pb-3 text-sm font-semibold transition ${
-                            activeTab === "tasks"
-                                ? "border-blue-600 text-blue-600"
-                                : "border-transparent text-slate-600 hover:text-slate-900"
-                        }`}
+                        className={`border-b-2 pb-3 text-sm font-semibold transition ${activeTab === "tasks"
+                            ? "border-blue-600 text-blue-600"
+                            : "border-transparent text-slate-600 hover:text-slate-900"
+                            }`}
                     >
                         Task ({tasks.length})
                     </button>
                     <button
                         onClick={() => setActiveTab("reports")}
-                        className={`border-b-2 pb-3 text-sm font-semibold transition ${
-                            activeTab === "reports"
-                                ? "border-blue-600 text-blue-600"
-                                : "border-transparent text-slate-600 hover:text-slate-900"
-                        }`}
+                        className={`border-b-2 pb-3 text-sm font-semibold transition ${activeTab === "reports"
+                            ? "border-blue-600 text-blue-600"
+                            : "border-transparent text-slate-600 hover:text-slate-900"
+                            }`}
                     >
                         Báo cáo ({reports.length})
                     </button>
@@ -127,73 +124,102 @@ export default function InternDetailView() {
             {/* Tab Content */}
             {activeTab === "info" && (
                 <div className="grid gap-6 md:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200 bg-white p-6">
-                        <h3 className="font-semibold text-slate-900">Thông tin cá nhân</h3>
-                        <div className="mt-4 space-y-3 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">Mã sinh viên:</span>
-                                <span className="font-medium text-slate-900">{intern.studentCode || "-"}</span>
+                    {/* 1. Personal Info */}
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <h3 className="font-bold text-slate-800">Thông tin cá nhân</h3>
+                        </div>
+                        <div className="space-y-4 text-sm">
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Họ và tên:</span>
+                                <span className="col-span-2 font-medium text-slate-900">{intern.fullName || intern.name}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">Ngày sinh:</span>
-                                <span className="font-medium text-slate-900">
-                  {intern.dob ? new Date(intern.dob).toLocaleDateString("vi-VN") : "-"}
-                </span>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Email:</span>
+                                <span className="col-span-2 font-medium text-slate-900">{intern.email}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">Số điện thoại:</span>
-                                <span className="font-medium text-slate-900">{intern.phone || "-"}</span>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Điện thoại:</span>
+                                <span className="col-span-2 font-medium text-slate-900">{intern.phone || "---"}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">GPA:</span>
-                                <span className="font-medium text-slate-900">{intern.gpa || "-"}</span>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Ngày sinh:</span>
+                                <span className="col-span-2 font-medium text-slate-900">
+                                    {intern.dob ? new Date(intern.dob).toLocaleDateString("vi-VN") : "---"}
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Địa chỉ:</span>
+                                <span className="col-span-2 font-medium text-slate-900">{intern.address || "---"}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-6">
-                        <h3 className="font-semibold text-slate-900">Thông tin học vấn</h3>
-                        <div className="mt-4 space-y-3 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">Trường:</span>
-                                <span className="font-medium text-slate-900">{intern.university || "-"}</span>
+                    {/* 2. Education Info */}
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <h3 className="font-bold text-slate-800">Thông tin học vấn</h3>
+                        </div>
+                        <div className="space-y-4 text-sm">
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Trường:</span>
+                                <span className="col-span-2 font-medium text-slate-900">{intern.university || "---"}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">Ngành:</span>
-                                <span className="font-medium text-slate-900">{intern.major || "-"}</span>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Chuyên ngành:</span>
+                                <span className="col-span-2 font-medium text-slate-900">{intern.major || "---"}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Mã sinh viên:</span>
+                                <span className="col-span-2 font-medium text-slate-900">{intern.studentCode || "---"}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">GPA:</span>
+                                <span className="col-span-2 font-medium text-slate-900">{intern.gpa || "---"}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Hồ sơ CV:</span>
+                                <span className="col-span-2 font-medium text-blue-600">
+                                    {intern.cvUrl ? <a href={intern.cvUrl} target="_blank" rel="noreferrer" className="hover:underline">Xem CV</a> : "Chưa cập nhật"}
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-6">
-                        <h3 className="font-semibold text-slate-900">Thời gian thực tập</h3>
-                        <div className="mt-4 space-y-3 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">Bắt đầu:</span>
-                                <span className="font-medium text-slate-900">
-                  {intern.startDate ? new Date(intern.startDate).toLocaleDateString("vi-VN") : "-"}
-                </span>
+                    {/* 3. Internship Period */}
+                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <h3 className="font-bold text-slate-800">Thời gian thực tập</h3>
+                        </div>
+                        <div className="space-y-4 text-sm">
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Ngày bắt đầu:</span>
+                                <span className="col-span-2 font-medium text-slate-900">
+                                    {intern.startDate ? new Date(intern.startDate).toLocaleDateString("vi-VN") : "---"}
+                                </span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">Kết thúc:</span>
-                                <span className="font-medium text-slate-900">
-                  {intern.endDate ? new Date(intern.endDate).toLocaleDateString("vi-VN") : "-"}
-                </span>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Ngày kết thúc:</span>
+                                <span className="col-span-2 font-medium text-slate-900">
+                                    {intern.endDate ? new Date(intern.endDate).toLocaleDateString("vi-VN") : "---"}
+                                </span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-600">Trạng thái:</span>
-                                <span
-                                    className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
-                                        intern.status === "ACTIVE"
-                                            ? "bg-green-50 text-green-700"
-                                            : "bg-slate-100 text-slate-700"
-                                    }`}
-                                >
-                  {intern.status === "ACTIVE" ? "Đang thực tập" : intern.status}
-                </span>
+                            <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Trạng thái:</span>
+                                <span className="col-span-2">
+                                    <span
+                                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${intern.status === "ACTIVE"
+                                                ? "bg-green-50 text-green-700"
+                                                : "bg-slate-100 text-slate-700"
+                                            }`}
+                                    >
+                                        {intern.status === "ACTIVE" ? "Đang thực tập" : intern.status}
+                                    </span>
+                                </span>
                             </div>
                         </div>
                     </div>
+
                 </div>
             )}
 

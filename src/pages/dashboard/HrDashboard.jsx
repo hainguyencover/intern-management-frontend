@@ -55,7 +55,7 @@ export default function HrDashboard() {
                         <Statistic
                             title="Hồ sơ chờ duyệt"
                             value={stats?.pendingApplications}
-                            valueStyle={{ color: '#faad14' }}
+                            styles={{ content: { color: '#faad14' } }}
                         />
                     </Card>
                 </Col>
@@ -65,7 +65,7 @@ export default function HrDashboard() {
                         <Statistic
                             title="Chương trình đang chạy"
                             value={stats?.activePrograms}
-                            valueStyle={{ color: '#3f8600' }}
+                            styles={{ content: { color: '#3f8600' } }}
                         />
                     </Card>
                 </Col>
