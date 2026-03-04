@@ -2,12 +2,12 @@ import axiosClient from "./axiosClient";
 
 export const dashboardApi = {
     getOverview: () => {
-        return axiosClient.get("/api/dashboard/overview");
+        return axiosClient.get("/api/v1/dashboard/overview");
     },
     getHrDashboard: () => {
-        return axiosClient.get("/api/dashboard/hr");
+        return axiosClient.get("/api/v1/dashboard/hr");
     },
     getUniversityStats: () => {
-        return axiosClient.get("/api/dashboard/university-stats");
+        return axiosClient.get("/api/v1/dashboard/university-stats");
     }
 };

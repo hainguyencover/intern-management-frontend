@@ -1,6 +1,19 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../StatusBadge";
+import {
+    FileText,
+    Users,
+    Calendar,
+    CheckCircle,
+    MessageSquare,
+    Eye,
+    ChevronRight,
+    Search
+} from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
 export default function ReportCard({ report, onClick }) {
     const formatDate = (date) => {
@@ -9,62 +22,75 @@ export default function ReportCard({ report, onClick }) {
     };
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
-            <div className="flex items-start justify-between">
-                <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-slate-900">
+        <Card className="group border-none shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+            <CardHeader className="p-6 pb-2">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <StatusBadge status={report.status} />
+                            {report.rating && (
+                                <Badge variant="secondary" className="h-5 px-1.5 rounded-md bg-indigo-50 text-indigo-600 border-indigo-100 font-black text-[9px] uppercase tracking-tighter">
+                                    Score: {report.rating}/10
+                                </Badge>
+                            )}
+                        </div>
+                        <h3 className="font-black text-slate-900 leading-tight group-hover:text-primary transition-colors">
                             Báo cáo tuần {report.weekNumber || report.week}
                         </h3>
-                        <StatusBadge status={report.status} />
                     </div>
-
-                    <div className="mt-2 space-y-1 text-sm">
-                        <div className="text-slate-600">
-                            <span className="font-medium">Thực tập sinh:</span>{" "}
-                            {report.internName || `ID: ${report.internId}`}
-                        </div>
-                        <div className="text-slate-600">
-                            <span className="font-medium">Ngày nộp:</span>{" "}
-                            {formatDate(report.submittedAt || report.reportDate)}
-                        </div>
-                        {report.reviewedAt && (
-                            <div className="text-slate-600">
-                                <span className="font-medium">Đã xem:</span> {formatDate(report.reviewedAt)}
-                            </div>
-                        )}
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary/5 group-hover:text-primary transition-all">
+                        <FileText className="h-5 w-5" />
                     </div>
+                </div>
+            </CardHeader>
 
-                    {report.summary && (
-                        <p className="mt-2 text-sm text-slate-600 line-clamp-2">{report.summary}</p>
-                    )}
-
-                    {report.mentorFeedback && (
-                        <div className="mt-3 rounded-lg bg-blue-50 p-3">
-                            <div className="text-xs font-semibold text-blue-900">Phản hồi của bạn:</div>
-                            <p className="mt-1 text-sm text-blue-800 line-clamp-2">{report.mentorFeedback}</p>
-                        </div>
-                    )}
+            <CardContent className="p-6 pt-2 space-y-4">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <Users className="h-3 w-3" />
+                        <span>{report.internName || `ID: ${report.internId}`}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <Calendar className="h-3 w-3" />
+                        <span>Nộp ngày: {formatDate(report.submittedAt || report.reportDate)}</span>
+                    </div>
                 </div>
 
-                <div className="ml-4">
-                    {onClick ? (
-                        <button
-                            onClick={() => onClick(report)}
-                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                        >
-                            Xem & Phản hồi
-                        </button>
-                    ) : (
-                        <Link
-                            to={`/mentor/reports/${report.id}`}
-                            className="inline-block rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                        >
-                            Xem chi tiết
+                {report.summary && (
+                    <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed bg-slate-50/50 p-3 rounded-xl border border-dashed border-slate-100 italic">
+                        "{report.summary}"
+                    </p>
+                )}
+
+                {report.mentorFeedback && (
+                    <div className="space-y-2 pt-2">
+                        <div className="flex justify-between text-[9px] font-black tracking-widest text-primary uppercase">
+                            <span className="flex items-center gap-1"><MessageSquare className="h-2.5 w-2.5" /> Mentor Insighter</span>
+                        </div>
+                        <p className="text-xs text-slate-600 font-bold leading-relaxed line-clamp-2">
+                            {report.mentorFeedback}
+                        </p>
+                    </div>
+                )}
+            </CardContent>
+
+            <CardFooter className="p-0 border-t bg-slate-50/30">
+                {onClick ? (
+                    <Button
+                        variant="ghost"
+                        className="w-full h-12 rounded-none font-black text-[11px] uppercase tracking-widest text-slate-500 hover:text-primary hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
+                        onClick={() => onClick(report)}
+                    >
+                        <Search className="h-3.5 w-3.5" /> Review & Feedback
+                    </Button>
+                ) : (
+                    <Button asChild variant="ghost" className="w-full h-12 rounded-none font-black text-[11px] uppercase tracking-widest text-slate-500 hover:text-primary hover:bg-slate-100 transition-all">
+                        <Link to={`/mentor/reports/${report.id}`} className="flex items-center justify-center gap-2">
+                            <Eye className="h-3.5 w-3.5" /> View Detailed Insights <ChevronRight className="h-3 w-3" />
                         </Link>
-                    )}
-                </div>
-            </div>
-        </div>
+                    </Button>
+                )}
+            </CardFooter>
+        </Card>
     );
 }

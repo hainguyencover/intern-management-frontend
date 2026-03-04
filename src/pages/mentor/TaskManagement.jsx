@@ -54,8 +54,7 @@ export default function TaskManagement() {
     const groupedTasks = {
         OPEN: tasks.filter((t) => t.status === "OPEN"),
         IN_PROGRESS: tasks.filter((t) => t.status === "IN_PROGRESS"),
-        SUBMITTED: tasks.filter((t) => t.status === "SUBMITTED"),
-        DONE: tasks.filter((t) => ["APPROVED", "DONE"].includes(t.status)),
+        SUBMITTED: tasks.filter((t) => ["SUBMITTED", "APPROVED", "DONE"].includes(t.status)),
     };
 
     if (loading) {
@@ -103,8 +102,6 @@ export default function TaskManagement() {
                         <option value="">Tất cả trạng thái</option>
                         <option value="OPEN">Mới</option>
                         <option value="IN_PROGRESS">Đang làm</option>
-                        <option value="SUBMITTED">Đã nộp</option>
-                        <option value="APPROVED">Đã duyệt</option>
                         <option value="DONE">Hoàn thành</option>
                     </select>
                     <button
@@ -117,7 +114,7 @@ export default function TaskManagement() {
             </div>
 
             {/* Task Board */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-3">
                 {/* Mới */}
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <div className="mb-3 flex items-center justify-between">
@@ -187,23 +184,7 @@ export default function TaskManagement() {
                     </div>
                 </div>
 
-                {/* Hoàn thành */}
-                <div className="rounded-xl border border-slate-200 bg-green-50 p-4">
-                    <div className="mb-3 flex items-center justify-between">
-                        <h3 className="font-semibold text-slate-900">
-                            Hoàn thành ({groupedTasks.DONE.length})
-                        </h3>
-                        <span className="text-xs text-slate-500">DONE</span>
-                    </div>
-                    <div className="space-y-2">
-                        {groupedTasks.DONE.map((task) => (
-                            <TaskCard key={task.id} task={task} />
-                        ))}
-                        {groupedTasks.DONE.length === 0 && (
-                            <p className="py-4 text-center text-sm text-slate-500">Không có task</p>
-                        )}
-                    </div>
-                </div>
+
             </div>
         </div>
     );

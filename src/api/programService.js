@@ -2,27 +2,27 @@ import axiosClient from "./axiosClient.js";
 
 export const programService = {
     // Programs
-    list: (params) => axiosClient.get("/api/programs", { params }),
+    list: (params) => axiosClient.get("/api/v1/programs", { params }),
 
-    getById: (id) => axiosClient.get(`/api/programs/${id}`),
+    getById: (id) => axiosClient.get(`/api/v1/programs/${id}`),
 
-    create: (data) => axiosClient.post("/api/programs", data),
+    create: (data) => axiosClient.post("/api/v1/programs", data),
 
-    update: (id, data) => axiosClient.put(`/api/programs/${id}`, data),
+    update: (id, data) => axiosClient.put(`/api/v1/programs/${id}`, data),
 
-    delete: (id) => axiosClient.delete(`/api/programs/${id}`),
+    delete: (id) => axiosClient.delete(`/api/v1/programs/${id}`),
 
     // Groups
     getGroups: (programId) =>
-        axiosClient.get("/api/program-groups", { params: { programId } }),
+        axiosClient.get("/api/v1/program-groups", { params: { programId } }),
 
-    getGroup: (id) => axiosClient.get(`/api/program-groups/${id}`),
+    getGroup: (id) => axiosClient.get(`/api/v1/program-groups/${id}`),
 
-    createGroup: (data) => axiosClient.post("/api/program-groups", data),
+    createGroup: (data) => axiosClient.post("/api/v1/program-groups", data),
 
-    updateGroup: (id, data) => axiosClient.put(`/api/program-groups/${id}`, data),
+    updateGroup: (id, data) => axiosClient.put(`/api/v1/program-groups/${id}`, data),
 
-    deleteGroup: (id) => axiosClient.delete(`/api/program-groups/${id}`),
+    deleteGroup: (id) => axiosClient.delete(`/api/v1/program-groups/${id}`),
 
     // Group Members
     getGroupMembers: (groupId) =>

@@ -1,16 +1,24 @@
 import React, { useState } from "react";
-import { createPortal } from "react-dom";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export default function DecisionModal({ open, onClose, onSubmit, mode = "APPROVE" }) {
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(false);
 
-    if (!open) return null;
-
-    const title = mode === "APPROVE" ? "Duyệt hồ sơ" : "Từ chối hồ sơ";
+    const title = mode === "APPROVE" ? "Duyệt hồ sơ ứng tuyển" : "Từ chối hồ sơ ứng tuyển";
     const hint = mode === "APPROVE"
-        ? "Xác nhận duyệt hồ sơ này."
-        : "Vui lòng nhập lý do từ chối (khuyến nghị).";
+        ? "Xác nhận rằng ứng viên này đáp ứng đủ tiêu chuẩn và cho phép tiến tới giai đoạn tiếp theo."
+        : "Vui lòng cung cấp lý do chi tiết để ứng viên có thể cải thiện trong tương lai.";
 
     const handleSubmit = async () => {
         try {
@@ -23,45 +31,54 @@ export default function DecisionModal({ open, onClose, onSubmit, mode = "APPROVE
         }
     };
 
-    return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
-                <div className="border-b px-5 py-4">
-                    <h3 className="text-lg font-semibold">{title}</h3>
-                    <p className="mt-1 text-sm text-slate-600">{hint}</p>
+    return (
+        <Dialog open={open} onOpenChange={(val) => !val && !loading && onClose()}>
+            <DialogContent className="max-w-md rounded-3xl border-none shadow-2xl p-0 overflow-hidden">
+                <DialogHeader className={`p-8 ${mode === "APPROVE" ? "bg-emerald-600" : "bg-rose-600"} text-white space-y-2`}>
+                    <DialogTitle className="text-2xl font-black leading-tight flex items-center gap-2">
+                        {mode === "APPROVE" ? <CheckCircle2 className="h-6 w-6" /> : <XCircle className="h-6 w-6" />}
+                        {title}
+                    </DialogTitle>
+                    <DialogDescription className="text-white/80 italic font-medium">
+                        {hint}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="p-8 space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
+                            {mode === "APPROVE" ? "GHI CHÚ HỆ THỐNG (TÙY CHỌN)" : "LÝ DO CHI TIẾT *"}
+                        </label>
+                        <Textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder={mode === "APPROVE" ? "Ghi chú thêm về hồ sơ này..." : "Nhập lý do từ chối hồ sơ..."}
+                            className="min-h-[120px] rounded-2xl border-slate-200 resize-none font-medium italic focus:ring-primary/20"
+                        />
+                    </div>
                 </div>
 
-                <div className="px-5 py-4">
-                    <label className="text-sm font-medium text-slate-700">Ghi chú / Lý do</label>
-                    <textarea
-                        className="mt-2 w-full resize-none rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                        rows={5}
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder={mode === "APPROVE" ? "Ghi chú (tùy chọn)" : "Lý do từ chối..."}
-                    />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 border-t px-5 py-4">
-                    <button
-                        className="rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50"
+                <DialogFooter className="p-6 bg-slate-50/50 border-t flex flex-row gap-3">
+                    <Button
+                        variant="ghost"
                         onClick={onClose}
                         disabled={loading}
+                        className="flex-1 h-12 rounded-2xl font-black text-[11px] uppercase tracking-widest text-slate-500 hover:bg-slate-100"
                     >
                         Hủy
-                    </button>
-                    <button
-                        className={`rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 ${
-                            mode === "APPROVE" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"
-                        }`}
+                    </Button>
+                    <Button
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={loading || (mode === "REJECT" && !comment.trim())}
+                        className={`flex-[2] h-12 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl transition-all active:scale-95 text-white ${mode === "APPROVE"
+                                ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                                : "bg-rose-600 hover:bg-rose-700 shadow-rose-200"
+                            }`}
                     >
-                        {loading ? "Đang xử lý..." : mode === "APPROVE" ? "Duyệt" : "Từ chối"}
-                    </button>
-                </div>
-            </div>
-        </div>,
-        document.body
+                        {loading ? "ĐANG XỬ LÝ..." : mode === "APPROVE" ? "XÁC NHẬN DUYỆT" : "XÁC NHẬN TỪ CHỐI"}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }

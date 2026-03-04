@@ -22,7 +22,7 @@ export default function CreateProgram() {
 
     const fetchDepartments = async () => {
         try {
-            const response = await axiosClient.get("/api/departments");
+            const response = await axiosClient.get("/api/v1/departments");
             setDepartments(response.data || []);
         } catch (error) {
             console.error("Failed to fetch departments:", error);

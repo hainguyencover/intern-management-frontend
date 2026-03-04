@@ -3,6 +3,7 @@ import { toast } from "sonner";
 // Use correctly named export from adminApi
 import { adminUserApi } from "../../api/adminApi";
 import CreateUserModal from "./CreateUserModal";
+import UserDetailModal from "./UserDetailModal";
 
 export default function UserManagement() {
     const [users, setUsers] = useState([]);
@@ -20,6 +21,7 @@ export default function UserManagement() {
 
     // Modal State
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -60,43 +62,10 @@ export default function UserManagement() {
         fetchUsers(); // Refresh list
     };
 
-    const handleLockUnlock = async (userId, currentStatus) => {
-        // currentStatus is boolean active in previous code, but let's check what the API returns.
-        // Based on AdminUsersPage.jsx, it seemed to look for 'ACTIVE' string, but UserManagement.jsx used boolean.
-        // Let's assume the API returns boolean 'enabled' or 'active' or string status. 
-        // Looking at AdminUsersPage.jsx provided earlier: user.status === 'ACTIVE'.
-        // Looking at UserManagement.jsx provided earlier: user.active (boolean).
-        // I will adhere to what the API likely returns. Usually Spring Identity uses 'enabled', 
-        // but let's stick to the previous code's assumption or the other file's assumption.
-        // AdminUsersPage.jsx used `user.status === 'ACTIVE'`.
-        // UserManagement.jsx used `user.active` boolean.
-        // I'll check the table rendering below.
-
-        try {
-            if (currentStatus) {
-                await adminUserApi.lockUser(userId);
-                toast.success("User locked successfully");
-            } else {
-                await adminUserApi.unlockUser(userId);
-                toast.success("User unlocked successfully");
-            }
-            fetchUsers();
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to update user status");
-        }
-    }
-
-    const handleResetPassword = async (userId) => {
-        if (!window.confirm("Are you sure you want to reset this user's password?")) return;
-        try {
-            await adminUserApi.resetPassword(userId);
-            toast.success("Password reset email sent (simulated)");
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to reset password");
-        }
-    }
+    const handleDetailSuccess = () => {
+        // Just refresh list to reflect status/role changes
+        fetchUsers();
+    };
 
     return (
         <div className="mx-auto w-full max-w-6xl p-5">
@@ -181,17 +150,19 @@ export default function UserManagement() {
                             ) : (
                                 users.map((user) => {
                                     // Determine active status safely
-                                    // Supporting both boolean active or string status for safety
                                     const isActive = user.active === true || user.status === 'ACTIVE';
 
                                     return (
-                                        <tr key={user.id} className="border-b border-slate-100 hover:bg-slate-50">
+                                        <tr
+                                            key={user.id}
+                                            className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer"
+                                            onClick={() => setSelectedUser(user)}
+                                        >
                                             <td className="px-4 py-3">
                                                 <div className="font-semibold text-slate-900">{user.fullName || "N/A"}</div>
                                                 <div className="text-slate-500 text-xs">{user.email}</div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                {/* user.roles might be array of strings or objects. Handling array of strings mostly. */}
                                                 {user.roles && user.roles.map(r => (
                                                     <span key={r} className="inline-block rounded bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 mr-1">
                                                         {r}
@@ -208,20 +179,15 @@ export default function UserManagement() {
                                                 {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
                                             </td>
                                             <td className="px-4 py-3 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleResetPassword(user.id)}
-                                                        className="text-xs font-medium text-slate-600 hover:text-slate-900"
-                                                    >
-                                                        Reset Pwd
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleLockUnlock(user.id, isActive)}
-                                                        className={`text-xs font-medium ${isActive ? "text-rose-600 hover:text-rose-800" : "text-emerald-600 hover:text-emerald-800"}`}
-                                                    >
-                                                        {isActive ? "Lock" : "Unlock"}
-                                                    </button>
-                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedUser(user);
+                                                    }}
+                                                    className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                                >
+                                                    Manage
+                                                </button>
                                             </td>
                                         </tr>
                                     )
@@ -260,6 +226,15 @@ export default function UserManagement() {
                 <CreateUserModal
                     onClose={() => setShowCreateModal(false)}
                     onSuccess={handleCreateSuccess}
+                />
+            )}
+
+            {/* Detail User Modal */}
+            {selectedUser && (
+                <UserDetailModal
+                    user={selectedUser}
+                    onClose={() => setSelectedUser(null)}
+                    onSuccess={handleDetailSuccess}
                 />
             )}
 

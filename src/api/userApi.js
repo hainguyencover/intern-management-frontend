@@ -1,13 +1,13 @@
 import axiosClient from "./axiosClient";
 
 export const userApi = {
-    createUser: (userData) => axiosClient.post("/api/users", userData),
+    createUser: (userData) => axiosClient.post("/api/v1/users", userData),
 
-    getUserById: (id) => axiosClient.get(`/api/users/${id}`),
+    updateUser: (userId, userData) => axiosClient.put(`/api/v1/users/${userId}`, userData),
 
-    updateUser: (id, userData) => axiosClient.put(`/api/users/${id}`, userData),
+    deleteUser: (userId) => axiosClient.delete(`/api/v1/users/${userId}`),
 
-    getCurrentUser: () => axiosClient.get("/api/users/me"),
+    getCurrentUser: () => axiosClient.get("/api/v1/users/me"),
 
-    searchUsers: (params) => axiosClient.get("/api/users", { params }),
+    searchUsers: (params) => axiosClient.get("/api/v1/users", { params }),
 };

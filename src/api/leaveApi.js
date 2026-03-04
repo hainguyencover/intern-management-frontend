@@ -3,23 +3,19 @@ import axiosClient from "./axiosClient";
 export const leaveApi = {
     // Intern actions
     createRequest: (data) => {
-        return axiosClient.post("/api/leave-requests", data);
+        return axiosClient.post("/api/v1/leave-requests", data);
     },
     getMyRequests: (params) => {
-        return axiosClient.get("/api/leave-requests/me", { params });
+        return axiosClient.get("/api/v1/leave-requests/me", { params });
     },
-    cancelRequest: (id) => {
-        return axiosClient.delete(`/api/leave-requests/${id}`);
+    getById: (id) => {
+        return axiosClient.get(`/api/v1/leave-requests/${id}`);
     },
-
     // HR actions
     getAllRequests: (params) => {
-        return axiosClient.get("/api/leave-requests", { params });
+        return axiosClient.get("/api/v1/leave-requests", { params });
     },
-    approve: (id) => {
-        return axiosClient.put(`/api/leave-requests/${id}/approve`);
+    updateStatus: (id, status, reason = "") => {
+        return axiosClient.put(`/api/v1/leave-requests/${id}/status`, { status, reason });
     },
-    reject: (id, reason) => {
-        return axiosClient.put(`/api/leave-requests/${id}/reject`, { reason });
-    }
 };

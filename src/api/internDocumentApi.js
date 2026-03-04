@@ -109,9 +109,9 @@ export const internDocumentApi = {
     getMyDocuments: async () => {
         try {
             const endpoints = [
-                "/api/intern/documents",
-                "/api/me/documents",
-                "/api/documents",
+                "/api/v1/intern/documents",
+                "/api/v1/me/documents",
+                "/api/v1/documents",
             ];
 
             const eps = endpoints.map((u) => ({ url: u }));
@@ -137,10 +137,10 @@ export const internDocumentApi = {
             }
 
             const endpoints = [
-                { url: "/api/intern/documents" },
-                { url: "/api/me/documents" },
-                { url: "/api/documents/upload" },
-                { url: "/api/documents" },
+                { url: "/api/v1/intern/documents" },
+                { url: "/api/v1/me/documents" },
+                { url: "/api/v1/documents/upload" },
+                { url: "/api/v1/documents" },
             ];
 
             const res = await tryEndpoints("post", endpoints, { body: form });
@@ -154,9 +154,9 @@ export const internDocumentApi = {
     getInternDocuments: async ({ internId }) => {
         try {
             const endpoints = [
-                `/api/hr/interns/${internId}/documents`,
-                `/api/interns/${internId}/documents`,
-                `/api/documents?internId=${internId}`,
+                `/api/v1/hr/interns/${internId}/documents`,
+                `/api/v1/interns/${internId}/documents`,
+                `/api/v1/documents?internId=${internId}`,
             ];
             const eps = endpoints.map((u) => ({ url: u }));
             const res = await tryEndpoints("get", eps);
@@ -170,15 +170,15 @@ export const internDocumentApi = {
         try {
             const endpoints = [
                 {
-                    url: `/api/documents/${id}/approve`,
+                    url: `/api/v1/documents/${id}/approve`,
                     config: { params: { hrUserId } },
                 },
                 {
-                    url: `/api/hr/documents/${id}/approve`,
+                    url: `/api/v1/hr/documents/${id}/approve`,
                     config: { params: { hrUserId } },
                 },
                 {
-                    url: `/api/hr/documents/${id}`,
+                    url: `/api/v1/hr/documents/${id}`,
                     config: { params: { action: "approve", hrUserId } },
                 },
             ];
@@ -194,15 +194,15 @@ export const internDocumentApi = {
         try {
             const endpoints = [
                 {
-                    url: `/api/documents/${id}/reject`,
+                    url: `/api/v1/documents/${id}/reject`,
                     config: { params: { hrUserId, note } },
                 },
                 {
-                    url: `/api/hr/documents/${id}/reject`,
+                    url: `/api/v1/hr/documents/${id}/reject`,
                     config: { params: { hrUserId, note } },
                 },
                 {
-                    url: `/api/hr/documents/${id}`,
+                    url: `/api/v1/hr/documents/${id}`,
                     config: { params: { action: "reject", hrUserId, note } },
                 },
             ];
@@ -219,14 +219,14 @@ export const internDocumentApi = {
         try {
             const urls = isHr
                 ? [
-                    `/api/hr/documents/download/${id}`,
-                    `/api/hr/documents/${id}/download`,
-                    `/api/documents/download/${id}`,
-                    `/api/documents/${id}/download`,
+                    `/api/v1/hr/documents/download/${id}`,
+                    `/api/v1/hr/documents/${id}/download`,
+                    `/api/v1/documents/download/${id}`,
+                    `/api/v1/documents/${id}/download`,
                 ]
                 : [
-                    `/api/documents/download/${id}`,
-                    `/api/documents/${id}/download`,
+                    `/api/v1/documents/download/${id}`,
+                    `/api/v1/documents/${id}/download`,
                 ];
 
             const baseConfig = {
@@ -246,14 +246,14 @@ export const internDocumentApi = {
     uploadContractForIntern: async (internId, file) => {
         const form = new FormData();
         form.append("file", file);
-        const res = await axiosClient.post(`/api/hr/interns/${internId}/documents/contracts`, form);
+        const res = await axiosClient.post(`/api/v1/hr/interns/${internId}/documents/contracts`, form);
         return res.data;
     },
 
     // HR list documents of an intern
     getDocumentsOfIntern: async (internId) => {
         try {
-            const res = await axiosClient.get(`/api/hr/interns/${internId}/documents`);
+            const res = await axiosClient.get(`/api/v1/hr/interns/${internId}/documents`);
             return res.data;
         } catch (err) {
             handleAxiosError(err);
@@ -262,15 +262,15 @@ export const internDocumentApi = {
 
     // HR download (alias endpoint)
     downloadAsBlob: (documentId) => {
-        return axiosClient.get(`/api/hr/documents/download/${documentId}`, {
+        return axiosClient.get(`/api/v1/hr/documents/download/${documentId}`, {
             responseType: "blob",
         });
     },
 
     confirmMyContract: async (documentId) => {
-        // backend: @PostMapping("/intern/documents/{id}/confirm")
+        // backend: @PostMapping("/api/v1/intern/documents/{id}/confirm")
         try {
-            const res = await axiosClient.post(`/api/intern/documents/${documentId}/confirm`);
+            const res = await axiosClient.post(`/api/v1/intern/documents/${documentId}/confirm`);
             return res.data;
         } catch (err) {
             handleAxiosError(err);
@@ -278,9 +278,8 @@ export const internDocumentApi = {
     },
 
     downloadMyAsBlob: (documentId) => {
-        // Nếu backend của bạn có endpoint download cho intern khác HR, bạn thay lại tại đây.
-        // Phổ biến: /api/documents/{id}/download
-        return axiosClient.get(`/api/documents/${documentId}/download`, {
+        // Phổ biến: /api/v1/documents/{id}/download
+        return axiosClient.get(`/api/v1/documents/${documentId}/download`, {
             responseType: "blob",
         });
     },

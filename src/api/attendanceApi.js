@@ -3,23 +3,23 @@ import axiosClient from "./axiosClient";
 export const attendanceApi = {
     // Intern actions
     checkIn: () => {
-        return axiosClient.post("/api/attendance/check-in");
+        return axiosClient.post("/api/v1/attendance/check-in");
     },
     checkOut: () => {
-        return axiosClient.post("/api/attendance/check-out");
+        return axiosClient.post("/api/v1/attendance/check-out");
     },
     getMyAttendance: (params) => {
-        return axiosClient.get("/api/attendance/me", { params });
+        return axiosClient.get("/api/v1/attendance/me", { params });
     },
     getTodayStatus: () => {
-        return axiosClient.get("/api/attendance/today");
+        return axiosClient.get("/api/v1/attendance/today");
     },
 
     // HR/Admin actions
     getAllAttendance: (params) => {
-        return axiosClient.get("/api/attendance/report", { params });
+        return axiosClient.get("/api/v1/attendance/report", { params });
     },
     getStats: (params) => {
-        return axiosClient.get("/api/attendance/stats", { params });
+        return axiosClient.get("/api/v1/attendance/stats", { params });
     }
 };

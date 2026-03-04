@@ -37,7 +37,7 @@ export default function MentorDashboard() {
     const {
         totalInterns = 0,
         activeTasks = 0,
-        pendingReports = 0,
+        reviewedReports = 0,
         recentTasks = [],
         recentReports = [],
     } = stats || {};
@@ -78,8 +78,8 @@ export default function MentorDashboard() {
                 </div>
 
                 <div className="rounded-xl border border-slate-200 bg-white p-6">
-                    <div className="text-sm font-medium text-slate-600">Báo cáo chờ xem</div>
-                    <div className="mt-2 text-3xl font-bold text-slate-900">{pendingReports}</div>
+                    <div className="text-sm font-medium text-slate-600">Báo cáo đã xử lý</div>
+                    <div className="mt-2 text-3xl font-bold text-slate-900">{reviewedReports}</div>
                     <Link
                         to="/mentor/reports"
                         className="mt-3 inline-block text-sm font-semibold text-blue-600 hover:text-blue-700"

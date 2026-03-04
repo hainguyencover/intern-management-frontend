@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listDepartments } from "../../api/departmentsApi.js";
+import { listDepartments } from "../../api/departmentApi.js";
 
 export default function ProgramForm({ initialValue, onSubmit, submitting }) {
     const [departments, setDepartments] = useState([]);

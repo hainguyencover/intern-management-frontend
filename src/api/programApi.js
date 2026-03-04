@@ -1,8 +1,8 @@
 import axiosClient from "./axiosClient";
 
 export const programApi = {
-    list: (params) => axiosClient.get("/api/programs", { params }),
-    create: (data) => axiosClient.post("/api/programs", data),
+    list: (params) => axiosClient.get("/api/v1/programs", { params }),
+    create: (data) => axiosClient.post("/api/v1/programs", data),
     update: (id, data) => axiosClient.put(`/api/programs/${id}`, data),
     getById: (id) => axiosClient.get(`/api/programs/${id}`),
     assignIntern: (id, internIds) => axiosClient.post(`/api/programs/${id}/assign-intern`, { internIds }),

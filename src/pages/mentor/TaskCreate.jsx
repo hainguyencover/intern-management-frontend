@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { taskApi } from "../../api/taskApi";
 import { mentorApi } from "../../api/mentorApi";
 import { toast } from "sonner";
 
 export default function TaskCreate() {
     const navigate = useNavigate();
+    const { id } = useParams();
+    const isEditMode = Boolean(id);
+
     const [searchParams] = useSearchParams();
     const [interns, setInterns] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -20,7 +23,32 @@ export default function TaskCreate() {
 
     useEffect(() => {
         loadInterns();
-    }, []);
+        if (isEditMode) {
+            loadTaskDetails();
+        }
+    }, [id]);
+
+    const loadTaskDetails = async () => {
+        try {
+            setLoading(true);
+            const res = await taskApi.getTaskDetail(id);
+            const task = res.data;
+            setFormData({
+                title: task.title,
+                description: task.description || "",
+                assigneeId: task.assigneeId || "",
+                groupId: task.groupId || "",
+                dueDate: task.dueDate ? task.dueDate.split('T')[0] : "",
+                priority: task.priority || "MEDIUM",
+            });
+        } catch (error) {
+            console.error("Failed to load task details:", error);
+            toast.error("Không thể tải thông tin task");
+            navigate("/mentor/tasks");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const loadInterns = async () => {
         try {
@@ -76,8 +104,13 @@ export default function TaskCreate() {
 
         try {
             setLoading(true);
-            await taskApi.createTask(formData);
-            toast.success("Đã tạo task mới");
+            if (isEditMode) {
+                await taskApi.updateTask(id, formData);
+                toast.success("Đã cập nhật task");
+            } else {
+                await taskApi.createTask(formData);
+                toast.success("Đã tạo task mới");
+            }
             navigate("/mentor/tasks");
         } catch (error) {
             console.error("Failed to create task:", error);
@@ -97,10 +130,10 @@ export default function TaskCreate() {
                     ← Quay lại
                 </button>
                 <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-                    Tạo task mới
+                    {isEditMode ? "Cập nhật task" : "Tạo task mới"}
                 </h1>
                 <p className="mt-1 text-sm text-slate-600">
-                    Giao nhiệm vụ cho thực tập sinh
+                    {isEditMode ? "Chỉnh sửa thông tin nhiệm vụ" : "Giao nhiệm vụ cho thực tập sinh"}
                 </p>
             </div>
 
@@ -199,7 +232,7 @@ export default function TaskCreate() {
                         disabled={loading}
                         className="h-10 flex-1 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                     >
-                        {loading ? "Đang tạo..." : "Tạo task"}
+                        {loading ? "Đang xử lý..." : (isEditMode ? "Lưu thay đổi" : "Tạo task")}
                     </button>
                     <button
                         type="button"

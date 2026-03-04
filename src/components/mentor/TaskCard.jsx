@@ -1,6 +1,20 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../StatusBadge";
+import {
+    User,
+    Calendar,
+    Clock,
+    Eye,
+    Edit2,
+    Trash2,
+    CheckCircle2,
+    AlertCircle
+} from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import { Button } from "../ui/button";
+import { Progress } from "../ui/progress";
+import { Badge } from "../ui/badge";
 
 export default function TaskCard({ task, onEdit, onDelete }) {
     const formatDate = (date) => {
@@ -17,83 +31,95 @@ export default function TaskCard({ task, onEdit, onDelete }) {
     const daysLeft = getDaysUntilDue(task.dueDate);
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
-            <div className="flex items-start justify-between">
-                <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-slate-900">{task.title}</h3>
-                        <StatusBadge status={task.status} />
-                    </div>
-
-                    <p className="mt-2 text-sm text-slate-600 line-clamp-2">
-                        {task.description || "Không có mô tả"}
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
-                        <div>
-                            <span className="font-medium">Người làm:</span>{" "}
-                            {task.assigneeName || `ID: ${task.assigneeId}`}
-                        </div>
-                        <div>
-                            <span className="font-medium">Deadline:</span> {formatDate(task.dueDate)}
-                            {daysLeft !== null && (
-                                <span
-                                    className={`ml-1 ${
-                                        daysLeft < 0
-                                            ? "text-red-600"
-                                            : daysLeft <= 3
-                                                ? "text-orange-600"
-                                                : "text-green-600"
-                                    }`}
-                                >
-                  ({daysLeft < 0 ? `Trễ ${Math.abs(daysLeft)} ngày` : `Còn ${daysLeft} ngày`})
-                </span>
+        <Card className="group border-none shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+            <CardHeader className="p-6 pb-2">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <StatusBadge status={task.status} />
+                            {task.progressPercent === 100 && (
+                                <Badge variant="secondary" className="h-5 px-1.5 rounded-md bg-emerald-50 text-emerald-600 border-emerald-100 font-bold text-[9px] uppercase tracking-tighter">
+                                    <CheckCircle2 className="mr-1 h-3 w-3" /> Ready
+                                </Badge>
                             )}
                         </div>
-                        {task.progressPercent !== undefined && (
-                            <div>
-                                <span className="font-medium">Tiến độ:</span> {task.progressPercent}%
-                            </div>
-                        )}
+                        <h3 className="font-black text-slate-900 leading-tight group-hover:text-primary transition-colors line-clamp-1">
+                            {task.title}
+                        </h3>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary/5 group-hover:text-primary transition-all">
+                        <Calendar className="h-5 w-5" />
+                    </div>
+                </div>
+            </CardHeader>
+
+            <CardContent className="p-6 pt-2 space-y-4">
+                <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed italic">
+                    {task.description || "Project Manager không cung cấp mô tả cho nhiệm vụ này."}
+                </p>
+
+                <div className="grid grid-cols-2 gap-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    <div className="flex items-center gap-1.5 overflow-hidden">
+                        <User className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{task.assigneeName || `ID: ${task.assigneeId}`}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 justify-end">
+                        <Clock className="h-3 w-3 text-slate-300" />
+                        <span className={daysLeft !== null && daysLeft <= 3 ? "text-rose-500" : "text-slate-500"}>
+                            {formatDate(task.dueDate)}
+                        </span>
                     </div>
                 </div>
 
-                <div className="ml-4 flex gap-2">
-                    <Link
-                        to={`/mentor/tasks/${task.id}`}
-                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                        Xem
-                    </Link>
+                {task.progressPercent !== undefined && (
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-[10px] font-black tracking-widest text-slate-300 uppercase">
+                            <span>Execution</span>
+                            <span className="text-slate-900">{task.progressPercent}%</span>
+                        </div>
+                        <Progress value={task.progressPercent} className="h-2 rounded-full bg-slate-100" />
+                    </div>
+                )}
+            </CardContent>
+
+            <CardFooter className="p-4 bg-slate-50/50 border-t flex items-center justify-between gap-2 overflow-x-auto">
+                <div className="flex items-center gap-1.5 shrink-0">
+                    <Button asChild variant="ghost" size="sm" className="h-8 rounded-lg font-bold text-slate-500 hover:text-slate-900">
+                        <Link to={`/mentor/tasks/${task.id}`}>
+                            <Eye className="mr-1.5 h-3.5 w-3.5" /> View
+                        </Link>
+                    </Button>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
                     {onEdit && (
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => onEdit(task)}
-                            className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                            className="h-8 w-8 rounded-lg p-0 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                         >
-                            Sửa
-                        </button>
+                            <Edit2 className="h-3.5 w-3.5" />
+                        </Button>
                     )}
                     {onDelete && (
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => onDelete(task.id)}
-                            className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
+                            className="h-8 w-8 rounded-lg p-0 text-rose-500 hover:bg-rose-50 hover:text-rose-600"
                         >
-                            Xóa
-                        </button>
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                     )}
                 </div>
-            </div>
+            </CardFooter>
 
-            {task.progressPercent !== undefined && (
-                <div className="mt-3">
-                    <div className="h-2 w-full rounded-full bg-slate-100">
-                        <div
-                            className="h-2 rounded-full bg-blue-500 transition-all"
-                            style={{ width: `${task.progressPercent}%` }}
-                        />
-                    </div>
+            {daysLeft !== null && daysLeft <= 2 && daysLeft >= 0 && (
+                <div className="absolute top-0 right-0 p-1">
+                    <div className="bg-rose-500 h-2 w-2 rounded-full animate-ping" />
                 </div>
             )}
-        </div>
+        </Card>
     );
 }

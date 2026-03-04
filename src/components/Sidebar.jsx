@@ -1,147 +1,214 @@
 import React, { useMemo } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-
-const navClass = ({ isActive }) =>
-    [
-        "block rounded-xl px-3 py-2 text-sm font-semibold transition",
-        isActive
-            ? "bg-slate-900 text-white"
-            : "text-slate-700 hover:bg-slate-100",
-    ].join(" ");
+import { cn } from "../utils/utils";
+import { Button } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
+import { Separator } from "./ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import {
+    LayoutDashboard,
+    UserCircle,
+    Users,
+    KeyRound,
+    FileText,
+    Database,
+    Briefcase,
+    Clock,
+    FileSearch,
+    UserCheck,
+    FolderKanban,
+    Building2,
+    ClipboardList,
+    FilePlus,
+    BarChart3,
+    CalendarCheck,
+    LogOut,
+    HelpCircle,
+    Settings,
+    Shield,
+    HeartPulse
+} from "lucide-react";
 
 export default function Sidebar() {
+    const { user, logout } = useAuth();
     const location = useLocation();
-    const { user } = useAuth();
 
-    const items = useMemo(() => {
+    const menuData = useMemo(() => {
         const roles = user?.roles || [];
         const isAdmin = roles.includes("ADMIN");
         const isHr = roles.includes("HR");
         const isMentor = roles.includes("MENTOR");
         const isIntern = roles.includes("INTERN");
-        // US10: Check approved status (inclusive of contract stages)
         const isApprovedIntern = isIntern && ['APPROVED', 'CONTRACT_SENT', 'CONTRACT_SIGNED'].includes(user?.applicationStatus);
 
-        const menu = [];
+        const sections = [];
 
-        // Common items
-        menu.push({ label: "Dashboard", to: "/dashboard" });
-        if (isIntern) {
-            menu.push({ label: "Hồ sơ cá nhân", to: "/profile" });
-        }
+        // General Section
+        const general = {
+            title: "Tổng quan",
+            items: [
+                { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+                { label: "Hồ sơ cá nhân", to: "/profile", icon: UserCircle },
+            ]
+        };
+        sections.push(general);
 
-        // Admin items
         if (isAdmin) {
-            menu.push(
-                { label: "Quản lý người dùng", to: "/admin/users" },
-                { label: "Phân quyền & Vai trò", to: "/admin/roles" },
-                { label: "Nhật ký hoạt động", to: "/admin/audit-logs" },
-                { label: "Sao lưu hệ thống", to: "/admin/system/backup" },
-                { label: "Tích hợp HRM", to: "/admin/hrm" },
-                { label: "Tích hợp Chấm công", to: "/admin/attendance-sync" }
-            );
+            sections.push({
+                title: "Hệ thống",
+                items: [
+                    { label: "Người dùng", to: "/admin/users", icon: Users },
+                    { label: "Phân quyền", to: "/admin/roles", icon: KeyRound },
+                    { label: "Nhật ký hệ thống", to: "/admin/audit-logs", icon: FileSearch },
+                    { label: "Sao lưu", to: "/admin/system/backup", icon: Database },
+                    { label: "Tích hợp HRM", to: "/admin/hrm", icon: Briefcase },
+                    { label: "Chấm công Sync", to: "/admin/attendance-sync", icon: Clock },
+                ]
+            });
         }
 
-        // HR items
         if (isHr) {
-            if (isHr) {
-                menu.push(
-                    // Management Section
-                    { type: 'header', label: 'Quản lý chung' },
-                    { label: "Thực tập sinh", to: "/hr/interns" },
-                    { label: "Hồ sơ ứng tuyển", to: "/hr/applications" },
-                    { label: "Chương trình", to: "/hr/programs" },
-                    { label: "Nhóm thực tập", to: "/hr/groups" },
-                    { label: "Người hướng dẫn", to: "/hr/mentors" },
-                    { label: "Phòng ban", to: "/hr/departments" },
+            sections.push({
+                title: "Quản lý nhân sự",
+                items: [
+                    { label: "Thực tập sinh", to: "/hr/interns", icon: Users },
+                    { label: "Hồ sơ ứng tuyển", to: "/hr/applications", icon: FilePlus },
+                    { label: "Chương trình", to: "/hr/programs", icon: FolderKanban },
+                    { label: "Nhóm thực tập", to: "/hr/groups", icon: Users },
+                    { label: "Người hướng dẫn", to: "/hr/mentors", icon: UserCheck },
+                    { label: "Phòng ban", to: "/hr/departments", icon: Building2 },
+                ]
+            });
 
-                    // Documents Section
-                    { type: 'header', label: 'Hồ sơ & Tài liệu' },
-                    { label: "Tài liệu (HR)", to: "/hr/documents", end: true },
-                    { label: "Hợp đồng thực tập", to: "/hr/documents/contracts" },
+            sections.push({
+                title: "Hồ sơ & Tài liệu",
+                items: [
+                    { label: "Tài liệu HR", to: "/hr/documents", icon: FileText, end: true },
+                    { label: "Hợp đồng", to: "/hr/documents/contracts", icon: ClipboardList },
+                ]
+            });
 
-                    // Reports Section
-                    { type: 'header', label: 'Báo cáo & Thống kê' },
-                    { label: "Báo cáo tổng kết", to: "/hr/reports" },
-                    { label: "Báo cáo Điểm danh", to: "/hr/attendance-reports" },
-                    { label: "Báo cáo Nghỉ phép", to: "/hr/leave-reports" },
-                    { label: "Duyệt nghỉ phép", to: "/hr/leave-approvals" },
-                    { label: "Thống kê", to: "/hr/statistics" },
-                    { label: "Quản lý phụ cấp", to: "/hr/allowances" },
-
-                    // Support Section
-                    { type: 'header', label: 'Khác' },
-                    { label: "HelpDesk", to: "/hr/helpdesk" }
-                );
-            }
+            sections.push({
+                title: "Báo cáo & Phụ cấp",
+                items: [
+                    { label: "Báo cáo tổng kết", to: "/hr/reports", icon: BarChart3 },
+                    { label: "Duyệt nghỉ phép", to: "/hr/leave-approvals", icon: CalendarCheck },
+                    { label: "Phụ cấp", to: "/hr/allowances", icon: Database },
+                    { label: "Thống kê", to: "/hr/statistics", icon: BarChart3 },
+                ]
+            });
         }
 
-        // Mentor items
         if (isMentor) {
-            menu.push(
-                { label: "TTS được phân công", to: "/mentor/interns" },
-                { label: "Đánh giá", to: "/mentor/evaluations" },
-                { label: "Công việc", to: "/mentor/tasks" },
-                { label: "Báo cáo tuần", to: "/mentor/reports" }
-            );
+            sections.push({
+                title: "Quản lý TTS",
+                items: [
+                    { label: "TTS phân công", to: "/mentor/interns", icon: Users },
+                    { label: "Đánh giá", to: "/mentor/evaluations", icon: UserCheck },
+                    { label: "Công việc", to: "/mentor/tasks", icon: ClipboardList },
+                    { label: "Báo cáo tuần", to: "/mentor/reports", icon: FileText },
+                ]
+            });
         }
 
-        // Intern items
-        // Intern items
         if (isIntern) {
-            // Basic items for all interns (including onboarding)
-            menu.push(
-                { label: "Hồ sơ đã nộp", to: "/intern/applications" },
-                { label: "Nộp hồ sơ", to: "/intern/apply" },
-                { label: "Tài liệu của tôi", to: "/intern/documents" }
-            );
+            const internSection = {
+                title: "Hành trình thực tập",
+                items: [
+                    { label: "Hồ sơ đã nộp", to: "/intern/applications", icon: FileSearch },
+                    { label: "Nộp hồ sơ", to: "/intern/apply", icon: FilePlus },
+                    { label: "Tài liệu của tôi", to: "/intern/documents", icon: FileText },
+                ]
+            };
 
-            // Approved items only
             if (isApprovedIntern) {
-                menu.push(
-                    { label: "Hợp đồng", to: "/intern/contracts" },
-                    { label: "Lịch của tôi", to: "/interns/me/schedule" },
-                    { label: "Chấm công", to: "/intern/attendance" },
-                    { label: "Công việc của tôi", to: "/intern/tasks" },
-                    { label: "Báo cáo tuần", to: "/intern/reports/weekly/submit" },
-                    { label: "Xin nghỉ phép", to: "/intern/leave-requests" },
-                    { label: "Phụ cấp của tôi", to: "/intern/allowances" },
-                    { label: "Hỗ trợ (HelpDesk)", to: "/intern/support" }
+                internSection.items.push(
+                    { label: "Hợp đồng", to: "/intern/contracts", icon: ClipboardList },
+                    { label: "Lịch trình", to: "/interns/me/schedule", icon: LayoutDashboard },
+                    { label: "Chấm công", to: "/intern/attendance", icon: Clock },
+                    { label: "Công việc", to: "/intern/tasks", icon: ClipboardList },
+                    { label: "Báo cáo tuần", to: "/intern/reports/weekly/submit", icon: FileText },
+                    { label: "Xin nghỉ phép", to: "/intern/leave-requests", icon: CalendarCheck },
+                    { label: "Phụ cấp", to: "/intern/allowances", icon: Database },
+                    { label: "Hỗ trợ", to: "/intern/support", icon: HelpCircle },
                 );
             }
+            sections.push(internSection);
         }
 
-        // Filter duplicates by 'to' path if multiple roles share items
-        const uniqueParams = new Set();
-        return menu.filter(item => {
-            if (!uniqueParams.has(item.to)) {
-                uniqueParams.add(item.to);
-                return true;
-            }
-            return false;
-        });
-    }, [user?.roles]);
+        return sections;
+    }, [user]);
 
     return (
-        <aside className="border-r border-slate-200 bg-white p-4 print:hidden">
-            <div className="mb-3 text-sm font-extrabold text-slate-900">Menu</div>
-            <nav className="flex flex-col gap-1">
-                {items.map((it, idx) => {
-                    if (it.type === 'header') {
-                        return (
-                            <div key={`header-${idx}`} className="mt-4 mb-1 px-3 text-xs font-bold uppercase text-slate-400">
-                                {it.label}
+        <aside className="relative flex h-screen flex-col border-r bg-card shadow-sm transition-all print:hidden">
+            {/* Logo area */}
+            <div className="flex h-16 items-center border-b px-6">
+                <Link to="/" className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                        <Shield className="h-5 w-5" />
+                    </div>
+                    <span className="text-lg font-bold tracking-tight">Antigravity</span>
+                </Link>
+            </div>
+
+            {/* Navigation area */}
+            <ScrollArea className="flex-1 px-4 py-4">
+                <div className="space-y-6">
+                    {menuData.map((section, idx) => (
+                        <div key={idx} className="space-y-2">
+                            <h4 className="px-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                                {section.title}
+                            </h4>
+                            <div className="space-y-1">
+                                {section.items.map((item) => (
+                                    <NavLink
+                                        key={item.to}
+                                        to={item.to}
+                                        end={item.end}
+                                        className={({ isActive }) =>
+                                            cn(
+                                                "flex items-center gap-3 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-200 hover:bg-accent hover:text-accent-foreground",
+                                                isActive
+                                                    ? "bg-secondary text-secondary-foreground shadow-sm"
+                                                    : "text-muted-foreground"
+                                            )
+                                        }
+                                    >
+                                        <item.icon className="h-4 w-4 shrink-0" />
+                                        <span>{item.label}</span>
+                                    </NavLink>
+                                ))}
                             </div>
-                        );
-                    }
-                    return (
-                        <NavLink key={`${it.to}-${it.label}`} to={it.to} className={navClass} end={it.end}>
-                            {it.label}
-                        </NavLink>
-                    );
-                })}
-            </nav>
+                        </div>
+                    ))}
+                </div>
+            </ScrollArea>
+
+            {/* User Profile area */}
+            <div className="border-t p-4">
+                <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-2 border border-slate-100">
+                    <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
+                        <AvatarImage src={user?.avatar} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                            {user?.fullName?.charAt(0) || "U"}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-1 flex-col overflow-hidden">
+                        <span className="truncate text-xs font-bold text-slate-900">{user?.fullName || "N/A"}</span>
+                        <span className="truncate text-[10px] text-muted-foreground capitalize">{user?.roles?.[0]?.toLowerCase() || "User"}</span>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={logout}
+                        title="Đăng xuất"
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
         </aside>
     );
 }

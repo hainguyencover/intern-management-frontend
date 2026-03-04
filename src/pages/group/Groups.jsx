@@ -129,11 +129,10 @@ export default function Groups() {
                                             </p>
                                         </div>
                                         <span
-                                            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                                                group.status === "ACTIVE"
+                                            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${group.status === "ACTIVE"
                                                     ? "bg-green-100 text-green-700"
                                                     : "bg-gray-100 text-gray-700"
-                                            }`}
+                                                }`}
                                         >
                                             {group.status === "ACTIVE" ? "Hoạt động" : "Không hoạt động"}
                                         </span>
@@ -218,7 +217,7 @@ function CreateGroupModal({ programId, onClose, onSuccess }) {
 
     const fetchMentors = async () => {
         try {
-            const response = await axiosClient.get("/api/mentors");
+            const response = await axiosClient.get("/api/v1/mentors");
             setMentors(response.data || []);
         } catch (error) {
             console.error("Failed to fetch mentors:", error);
@@ -321,7 +320,7 @@ function AssignInternsModal({ group, onClose, onSuccess }) {
 
     const fetchInterns = async () => {
         try {
-            const response = await axiosClient.get("/api/interns/search", {
+            const response = await axiosClient.get("/api/v1/interns/search", {
                 params: { size: 100 },
             });
             setInterns(response.data.content || []);

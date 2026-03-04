@@ -1,17 +1,41 @@
-import React, {useMemo, useState} from "react";
-import {Link, useNavigate} from "react-router-dom";
-import {useForm} from "react-hook-form";
-import {toast} from "sonner";
-import {authApi} from "../api/authApi";
+import React, { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+import { authApi } from "../api/authApi";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/card";
+import { Shield, CheckCircle2, Info } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
+
+const registerSchema = z.object({
+    fullName: z.string().min(1, "Vui lòng nhập họ và tên"),
+    email: z.string().email("Email không hợp lệ"),
+    password: z.string().min(6, "Mật khẩu tối thiểu 6 ký tự"),
+    phone: z.string().min(10, "Số điện thoại tối thiểu 10 số"),
+    dobYear: z.string().or(z.number()),
+    address: z.string().min(1, "Vui lòng nhập địa chỉ"),
+    studentCode: z.string().min(1, "Vui lòng nhập mã sinh viên"),
+    university: z.string().min(1, "Vui lòng nhập tên trường"),
+    major: z.string().min(1, "Vui lòng nhập ngành học"),
+    startYear: z.string().or(z.number()),
+    endYear: z.string().or(z.number()),
+}).refine((data) => Number(data.endYear) >= Number(data.startYear), {
+    message: "Năm kết thúc phải lớn hơn hoặc bằng năm bắt đầu",
+    path: ["endYear"],
+});
 
 export default function Register() {
     const navigate = useNavigate();
     const [submitting, setSubmitting] = useState(false);
 
     const yearOptions = useMemo(() => {
-        // cho nhập năm linh hoạt, nhưng gợi ý range
         const start = 1980;
         const end = currentYear + 5;
         const arr = [];
@@ -22,9 +46,11 @@ export default function Register() {
     const {
         register,
         handleSubmit,
+        control,
         watch,
-        formState: {errors},
+        formState: { errors },
     } = useForm({
+        resolver: zodResolver(registerSchema),
         defaultValues: {
             fullName: "",
             email: "",
@@ -38,29 +64,15 @@ export default function Register() {
             startYear: 2022,
             endYear: 2024,
         },
-        mode: "onBlur",
     });
 
-    const startYear = Number(watch("startYear"));
-    const endYear = Number(watch("endYear"));
+    const watchStartYear = watch("startYear");
+    const watchEndYear = watch("endYear");
 
     const onSubmit = async (values) => {
-        // client-side guard
-        if (Number(values.endYear) < Number(values.startYear)) {
-            toast.error("Năm kết thúc phải lớn hơn hoặc bằng năm bắt đầu");
-            return;
-        }
-
         const payload = {
-            fullName: values.fullName?.trim(),
-            email: values.email?.trim(),
-            password: values.password,
-            phone: values.phone?.trim(),
+            ...values,
             dobYear: Number(values.dobYear),
-            address: values.address?.trim(),
-            studentCode: values.studentCode?.trim(),
-            university: values.university?.trim(),
-            major: values.major?.trim(),
             startYear: Number(values.startYear),
             endYear: Number(values.endYear),
         };
@@ -78,216 +90,201 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 p-4 lg:grid-cols-2 lg:items-center lg:p-8">
-                {/* Left */}
-                <div className="space-y-4">
-                    <div
-                        className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-slate-700 ring-1 ring-slate-200">
-                        Intern Management System
-                    </div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-                        Tạo tài khoản thực tập sinh
-                    </h1>
-                    <p className="text-base text-slate-600">
-                        Điền thông tin cơ bản để đăng ký. Bạn có thể bổ sung tài liệu/hồ sơ ở các bước sau.
-                    </p>
+        <div className="relative min-h-screen w-full bg-slate-50 py-12 px-4 selection:bg-primary/10">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <div className="absolute -left-[5%] -top-[5%] h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px]" />
+                <div className="absolute -right-[5%] -bottom-[5%] h-[400px] w-[400px] rounded-full bg-blue-500/5 blur-[100px]" />
+            </div>
 
-                    <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                        <div className="text-sm font-semibold text-slate-900">Lưu ý</div>
-                        <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-slate-600">
-                            <li>Email phải duy nhất.</li>
-                            <li>Mật khẩu tối thiểu 6 ký tự.</li>
-                            <li>Năm kết thúc phải ≥ năm bắt đầu.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                {/* Right Form */}
-                <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                    <div className="mb-4">
-                        <h2 className="text-lg font-bold text-slate-900">Đăng ký</h2>
-                        <p className="mt-1 text-sm text-slate-600">
-                            Đã có tài khoản?{" "}
-                            <Link to="/login"
-                                  className="font-semibold text-slate-900 underline decoration-slate-300 hover:decoration-slate-700">
-                                Đăng nhập
+            <div className="relative z-10 mx-auto max-w-5xl">
+                <div className="grid grid-cols-1 gap-12 lg:grid-cols-5">
+                    {/* Left Column: Info */}
+                    <div className="lg:col-span-2 space-y-8 py-4">
+                        <div className="space-y-4">
+                            <Link to="/login" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-border shadow-sm text-xs font-semibold text-muted-foreground hover:bg-slate-50 transition-colors">
+                                <Shield className="h-3.5 w-3.5 text-primary" />
+                                Intern Management System
                             </Link>
-                        </p>
+                            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                                Bắt đầu hành trình <span className="text-primary italic">Thực tập sinh</span> của bạn
+                            </h1>
+                            <p className="text-lg text-slate-600 leading-relaxed">
+                                Gia nhập đội ngũ trẻ, năng động và phát triển kỹ năng thực chiến tại môi trường chuyên nghiệp.
+                            </p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {[
+                                "Quy trình đăng ký nhanh gọn",
+                                "Quản lý lộ trình thực tập minh bạch",
+                                "Đánh giá và phản hồi từ Mentor",
+                                "Cơ hội trở thành nhân viên chính thức"
+                            ].map((item, i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                    </div>
+                                    <span className="text-sm font-medium text-slate-700">{item}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <Card className="bg-slate-900 border-none text-slate-50 shadow-2xl">
+                            <CardContent className="p-6">
+                                <div className="flex gap-4">
+                                    <Info className="h-5 w-5 shrink-0 text-primary" />
+                                    <div className="space-y-2">
+                                        <h4 className="font-semibold text-sm">Lưu ý quan trọng</h4>
+                                        <ul className="text-xs text-slate-400 space-y-1 mt-1 list-disc list-inside">
+                                            <li>Email phải duy nhất và đang hoạt động.</li>
+                                            <li>Mật khẩu tối thiểu 6 ký tự để bảo mật.</li>
+                                            <li>Thông tin sinh viên cần chính xác để xét duyệt.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        {/* fullName */}
-                        <Field label="Họ và tên" error={errors.fullName?.message}>
-                            <input
-                                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                placeholder="Nguyễn Đức Hải"
-                                {...register("fullName", {required: "Vui lòng nhập họ và tên"})}
-                            />
-                        </Field>
+                    {/* Right Column: Form */}
+                    <div className="lg:col-span-3">
+                        <Card className="border-border/60 shadow-2xl shadow-slate-200/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="text-2xl">Đăng ký tài khoản</CardTitle>
+                                <CardDescription>
+                                    Cung cấp thông tin chi tiết để chúng tôi hiểu thêm về bạn
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="fullName">Họ và tên</Label>
+                                            <Input id="fullName" placeholder="Nguyễn Văn A" {...register("fullName")} className={errors.fullName ? "border-destructive" : ""} />
+                                            {errors.fullName && <p className="text-[10px] font-medium text-destructive">{errors.fullName.message}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="email">Email</Label>
+                                            <Input id="email" type="email" placeholder="example@mail.com" {...register("email")} className={errors.email ? "border-destructive" : ""} />
+                                            {errors.email && <p className="text-[10px] font-medium text-destructive">{errors.email.message}</p>}
+                                        </div>
+                                    </div>
 
-                        {/* email */}
-                        <Field label="Email" error={errors.email?.message}>
-                            <input
-                                type="email"
-                                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                placeholder="hai@gmail.com"
-                                {...register("email", {
-                                    required: "Vui lòng nhập email",
-                                    pattern: {value: /^\S+@\S+\.\S+$/, message: "Email không hợp lệ"},
-                                })}
-                            />
-                        </Field>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="password">Mật khẩu</Label>
+                                            <Input id="password" type="password" placeholder="••••••••" {...register("password")} className={errors.password ? "border-destructive" : ""} />
+                                            {errors.password && <p className="text-[10px] font-medium text-destructive">{errors.password.message}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="phone">Số điện thoại</Label>
+                                            <Input id="phone" placeholder="0123 456 789" {...register("phone")} className={errors.phone ? "border-destructive" : ""} />
+                                            {errors.phone && <p className="text-[10px] font-medium text-destructive">{errors.phone.message}</p>}
+                                        </div>
+                                    </div>
 
-                        {/* password */}
-                        <Field label="Mật khẩu" error={errors.password?.message}>
-                            <input
-                                type="password"
-                                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                placeholder="••••••••"
-                                {...register("password", {
-                                    required: "Vui lòng nhập mật khẩu",
-                                    minLength: {value: 6, message: "Mật khẩu tối thiểu 6 ký tự"},
-                                })}
-                            />
-                        </Field>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="dobYear">Năm sinh</Label>
+                                            <Controller
+                                                name="dobYear"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                                                        <SelectTrigger id="dobYear">
+                                                            <SelectValue placeholder="Chọn năm sinh" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {yearOptions.map(year => (
+                                                                <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="address">Địa chỉ</Label>
+                                            <Input id="address" placeholder="Hà Nội, Việt Nam" {...register("address")} />
+                                        </div>
+                                    </div>
 
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {/* phone */}
-                            <Field label="Số điện thoại" error={errors.phone?.message}>
-                                <input
-                                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                    placeholder="0123456789"
-                                    {...register("phone", {required: "Vui lòng nhập số điện thoại"})}
-                                />
-                            </Field>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="studentCode">Mã sinh viên</Label>
+                                            <Input id="studentCode" placeholder="SV001" {...register("studentCode")} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="university">Trường đại học</Label>
+                                            <Input id="university" placeholder="FPT University" {...register("university")} />
+                                        </div>
+                                    </div>
 
-                            {/* dobYear */}
-                            <Field label="Năm sinh" error={errors.dobYear?.message}>
-                                <select
-                                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                    {...register("dobYear", {
-                                        required: "Vui lòng chọn năm sinh",
-                                        valueAsNumber: true,
-                                        min: {value: 1900, message: "Năm sinh không hợp lệ"},
-                                        max: {value: currentYear, message: "Năm sinh không hợp lệ"},
-                                    })}
-                                >
-                                    {yearOptions.map((y) => (
-                                        <option key={y} value={y}>
-                                            {y}
-                                        </option>
-                                    ))}
-                                </select>
-                            </Field>
-                        </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="major">Ngành học</Label>
+                                        <Input id="major" placeholder="Kỹ thuật phần mềm" {...register("major")} />
+                                    </div>
 
-                        {/* address */}
-                        <Field label="Địa chỉ" error={errors.address?.message}>
-                            <input
-                                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                placeholder="Ninh Bình"
-                                {...register("address", {required: "Vui lòng nhập địa chỉ"})}
-                            />
-                        </Field>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="startYear">Năm bắt đầu</Label>
+                                            <Controller
+                                                name="startYear"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                                                        <SelectTrigger id="startYear">
+                                                            <SelectValue placeholder="Chọn năm" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {yearOptions.map(year => (
+                                                                <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="endYear">Năm kết thúc dự kiến</Label>
+                                            <Controller
+                                                name="endYear"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                                                        <SelectTrigger id="endYear" className={errors.endYear ? "border-destructive" : ""}>
+                                                            <SelectValue placeholder="Chọn năm" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {yearOptions.map(year => (
+                                                                <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                            {errors.endYear && <p className="text-[10px] font-medium text-destructive">{errors.endYear.message}</p>}
+                                        </div>
+                                    </div>
 
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {/* studentCode */}
-                            <Field label="Mã sinh viên" error={errors.studentCode?.message}>
-                                <input
-                                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                    placeholder="SV2004"
-                                    {...register("studentCode", {required: "Vui lòng nhập mã sinh viên"})}
-                                />
-                            </Field>
-
-                            {/* university */}
-                            <Field label="Trường" error={errors.university?.message}>
-                                <input
-                                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                    placeholder="Cao đẳng FPT Polytechnic"
-                                    {...register("university", {required: "Vui lòng nhập tên trường"})}
-                                />
-                            </Field>
-                        </div>
-
-                        {/* major */}
-                        <Field label="Ngành học" error={errors.major?.message}>
-                            <input
-                                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                placeholder="CNTT"
-                                {...register("major", {required: "Vui lòng nhập ngành học"})}
-                            />
-                        </Field>
-
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {/* startYear */}
-                            <Field label="Bắt đầu từ năm" error={errors.startYear?.message}>
-                                <select
-                                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                    {...register("startYear", {
-                                        required: "Vui lòng chọn năm bắt đầu",
-                                        valueAsNumber: true,
-                                        min: {value: 1900, message: "Năm bắt đầu không hợp lệ"},
-                                        max: {value: currentYear + 10, message: "Năm bắt đầu không hợp lệ"},
-                                    })}
-                                >
-                                    {yearOptions.map((y) => (
-                                        <option key={y} value={y}>
-                                            {y}
-                                        </option>
-                                    ))}
-                                </select>
-                            </Field>
-
-                            {/* endYear */}
-                            <Field label="Kết thúc từ năm" error={errors.endYear?.message}>
-                                <select
-                                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                                    {...register("endYear", {
-                                        required: "Vui lòng chọn năm kết thúc",
-                                        valueAsNumber: true,
-                                        validate: (v) =>
-                                            Number(v) >= Number(startYear) || "Năm kết thúc phải ≥ năm bắt đầu",
-                                    })}
-                                >
-                                    {yearOptions.map((y) => (
-                                        <option key={y} value={y}>
-                                            {y}
-                                        </option>
-                                    ))}
-                                </select>
-                            </Field>
-                        </div>
-
-                        {/* inline hint */}
-                        <div className="text-xs text-slate-500">
-                            Đang chọn: <span className="font-semibold">{startYear}</span> →{" "}
-                            <span className="font-semibold">{endYear}</span>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={submitting}
-                            className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
-                        >
-                            {submitting ? "Đang đăng ký..." : "Đăng ký"}
-                        </button>
-                    </form>
+                                    <Button type="submit" className="w-full h-11 text-base shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99]" disabled={submitting}>
+                                        {submitting ? "Đang xử lý đăng ký..." : "Hoàn tất đăng ký"}
+                                    </Button>
+                                </form>
+                            </CardContent>
+                            <CardFooter className="flex flex-col gap-4">
+                                <div className="text-center text-sm">
+                                    <span className="text-muted-foreground">Đã có tài khoản? </span>
+                                    <Link to="/login" className="font-bold text-primary hover:underline">
+                                        Đăng nhập ngay
+                                    </Link>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
-}
-
-function Field({label, error, children}) {
-    return (
-        <div>
-            <div className="mb-1 flex items-center justify-between">
-                <label className="text-sm font-semibold text-slate-900">{label}</label>
-                {error && <span className="text-xs font-semibold text-rose-600">{error}</span>}
-            </div>
-            {children}
         </div>
     );
 }

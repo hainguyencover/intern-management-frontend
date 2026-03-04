@@ -2,162 +2,88 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { internApi } from "../../api/internApi";
 import { toast } from "sonner";
+import InternForm from "./InternForm";
+import {
+    ChevronLeft,
+    Sparkles,
+    UserPlus,
+    Activity,
+    ShieldCheck
+} from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
 
 export default function CreateIntern() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({
-        email: "",
-        fullName: "",
-        phone: "",
-        university: "",
-        major: "",
-        gpa: "",
-        dob: "",
-        address: "",
-        studentCode: "",
-    });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (payload) => {
         try {
             setLoading(true);
-            await internApi.create(form);
-            toast.success("Tạo hồ sơ thành công");
+            await internApi.create(payload);
+            toast.success("Personnel initialization complete");
             navigate("/hr/interns");
         } catch (err) {
-            toast.error(err.response?.data?.message || "Tạo hồ sơ thất bại");
+            toast.error(err.response?.data?.message || "Initialization protocol failure");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="mx-auto w-full max-w-3xl">
-            <div className="mb-4">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="text-sm font-semibold text-slate-600 hover:text-slate-900"
-                >
-                    ← Quay lại
-                </button>
-                <h1 className="mt-2 text-2xl font-bold">Thêm mới thực tập sinh</h1>
+        <div className="p-8 pb-24 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-5xl mx-auto">
+            {/* Tactical Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div className="space-y-6">
+                    <Button
+                        variant="ghost"
+                        onClick={() => navigate(-1)}
+                        className="h-9 px-3 rounded-xl text-slate-400 hover:text-slate-900 font-black text-[10px] uppercase tracking-widest group"
+                    >
+                        <ChevronLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> Return to Command
+                    </Button>
+                    <div className="flex items-start gap-6">
+                        <div className="h-20 w-20 rounded-[2rem] bg-primary flex items-center justify-center text-white shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                            <UserPlus className="h-8 w-8 relative z-10" />
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">
+                                    Strategic Onloading
+                                </h1>
+                                <Badge variant="outline" className="border-primary/20 text-primary font-black text-[9px] uppercase tracking-[0.2em] h-5">
+                                    NEW_ENTRY
+                                </Badge>
+                            </div>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.3em] flex items-center gap-2">
+                                <Activity className="h-3.5 w-3.5 text-emerald-500" /> Administrative Personnel Initialization
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="rounded-2xl border bg-white p-6">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">Email *</label>
-                        <input
-                            required
-                            type="email"
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.email}
-                            onChange={(e) => setForm({ ...form, email: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">Họ tên *</label>
-                        <input
-                            required
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.fullName}
-                            onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">Mật khẩu (Tùy chọn)</label>
-                        <input
-                            type="password"
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            placeholder="Để trống sẽ tự sinh ngẫu nhiên"
-                            value={form.password || ""}
-                            onChange={(e) => setForm({ ...form, password: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">Mã sinh viên</label>
-                        <input
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.studentCode}
-                            onChange={(e) => setForm({ ...form, studentCode: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">Điện thoại</label>
-                        <input
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.phone}
-                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">Trường *</label>
-                        <input
-                            required
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.university}
-                            onChange={(e) => setForm({ ...form, university: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">Ngành *</label>
-                        <input
-                            required
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.major}
-                            onChange={(e) => setForm({ ...form, major: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">GPA</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="4"
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.gpa}
-                            onChange={(e) => setForm({ ...form, gpa: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-700">Ngày sinh</label>
-                        <input
-                            type="date"
-                            className="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.dob}
-                            onChange={(e) => setForm({ ...form, dob: e.target.value })}
-                        />
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="text-sm font-medium text-slate-700">Địa chỉ</label>
-                        <textarea
-                            rows={3}
-                            className="mt-1 w-full resize-none rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-                            value={form.address}
-                            onChange={(e) => setForm({ ...form, address: e.target.value })}
-                        />
-                    </div>
-                </div>
+            {/* Form Section */}
+            <InternForm
+                mode="create"
+                submitting={loading}
+                onSubmit={handleSubmit}
+                onCancel={() => navigate(-1)}
+                submitText="Execute Initialization"
+            />
 
-                <div className="mt-6 flex justify-end gap-2">
-                    <button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50"
-                    >
-                        Hủy
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
-                    >
-                        {loading ? "Đang lưu..." : "Tạo mới"}
-                    </button>
+            <div className="p-10 rounded-[3rem] bg-slate-50 border border-slate-100 flex items-start gap-6">
+                <div className="h-12 w-12 rounded-2xl bg-white shadow-xl flex items-center justify-center text-primary shrink-0">
+                    <ShieldCheck className="h-6 w-6" />
                 </div>
-            </form>
+                <div className="space-y-1">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Governance Notice</h4>
+                    <p className="text-xs font-bold text-slate-500 leading-relaxed italic">
+                        All strategic onboarding records are subjected to multi-layer cryptographic logging. Personnel credentials will be generated and distributed upon successful execution.
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }

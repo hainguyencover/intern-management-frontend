@@ -59,6 +59,7 @@ export function AuthProvider({ children }) {
         try {
             // Backend của bạn trả JwtResponse: { token, roles, email, fullName, id }
             const res = await authApi.login({ email, password });
+            // res is now the unwrapped ApiResponse, so res.data is the payload
             const data = res.data;
 
             const accessToken = data.token || data.accessToken;
@@ -66,6 +67,9 @@ export function AuthProvider({ children }) {
 
             setToken(accessToken);
             localStorage.setItem("accessToken", accessToken);
+            if (data.refreshToken) {
+                localStorage.setItem("refreshToken", data.refreshToken);
+            }
 
             // Lưu user + roles (role codes: ADMIN/HR/MENTOR/INTERN)
             const nextUser = {
@@ -87,6 +91,7 @@ export function AuthProvider({ children }) {
         setToken("");
         setUser(null);
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("authUser");
     };
 
@@ -96,11 +101,11 @@ export function AuthProvider({ children }) {
             if (!token) return; // Always refresh user data on mount if token exists
             try {
                 const res = await authApi.me();
-                const me = res.data;
+                const me = res.data; // res is already unwrapped, so res.data is the payload
                 const nextUser = {
                     id: me.id,
                     email: me.email,
-                    fullName: me.fullName || me.name || me.fullName,
+                    fullName: me.fullName || me.name,
                     roles: mapRoles(me.roles || me.authorities || me.authority),
                     // US10: Add fields for Intern Guard
                     status: me.status,
