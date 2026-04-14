@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const applicationApi = {
     submit: (payload) => axiosClient.post("/api/v1/applications", payload),

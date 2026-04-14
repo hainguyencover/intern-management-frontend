@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { DATE_FORMAT, DATETIME_FORMAT } from "./constants";
+import { DATE_FORMAT, DATETIME_FORMAT } from "@/utils/constants";
 
 export const formatDate = (date, format = DATE_FORMAT) => {
     if (!date) return "";

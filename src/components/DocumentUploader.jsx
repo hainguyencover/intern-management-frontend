@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import { UploadCloud, FileText, X, AlertCircle } from "lucide-react";
-import { documentApi } from "../api/documentApi";
+import { documentApi } from "@/api/documentApi";
 import { toast } from "sonner";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function DocumentUploader({ type = "CV", internId, onUploadSuccess }) {
     const [uploading, setUploading] = useState(false);

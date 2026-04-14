@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const listDepartments = () =>
     axiosClient.get("/api/v1/departments").then((r) => r.data);

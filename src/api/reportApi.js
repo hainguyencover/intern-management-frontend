@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const reportApi = {
     // Lấy báo cáo của một intern

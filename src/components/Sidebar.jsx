@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
-import { cn } from "../utils/utils";
-import { Button } from "./ui/button";
-import { ScrollArea } from "./ui/scroll-area";
-import { Separator } from "./ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useAuth } from "@/features/auth/model/AuthContext";
+import { cn } from "@/utils/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     LayoutDashboard,
     UserCircle,

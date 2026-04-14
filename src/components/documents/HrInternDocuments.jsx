@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {toast} from "sonner";
-import StatusBadge from "../StatusBadge.jsx";
-import {internDocumentApi} from "../../api/internDocumentApi.js";
+import StatusBadge from "@/components/StatusBadge.jsx";
+import {internDocumentApi} from "@/api/internDocumentApi.js";
 
 export default function HrInternDocuments({internId, hrUserId}) {
     const [docs, setDocs] = useState([]);

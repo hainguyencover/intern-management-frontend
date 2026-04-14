@@ -1,82 +1,82 @@
 import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
-import { AuthProvider, useAuth } from "./auth/AuthContext";
-import ProtectedRoute from "./auth/ProtectedRoute";
-import InternGuard from "./auth/InternGuard";
-import ErrorBoundary from "./components/common/ErrorBoundary";
+import { AuthProvider, useAuth } from "@/features/auth/model/AuthContext";
+import ProtectedRoute from "@/features/auth/ui/ProtectedRoute";
+import InternGuard from "@/features/auth/ui/InternGuard";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
 import "./index.css";
 
 // Auth
-const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
-const MainLayout = lazy(() => import("./layouts/MainLayout"));
+const Login = lazy(() => import("@/features/auth/ui/Login"));
+const Register = lazy(() => import("@/features/auth/ui/Register"));
+const MainLayout = lazy(() => import("@/layouts/MainLayout"));
 
 // Admin
-const AdminDashboard = lazy(() => import("./pages/dashboard/AdminDashboard"));
-const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
-const RoleManagement = lazy(() => import("./pages/admin/RolePermissionsPage.jsx"));
-const BackupManagement = lazy(() => import("./pages/admin/BackupManagement"));
-const AuditLogsPage = lazy(() => import("./pages/admin/AuditLogsPage.jsx"));
-const SystemConfig = lazy(() => import("./pages/admin/SystemConfig"));
-const HrmIntegration = lazy(() => import("./pages/admin/HrmIntegration"));
-const TimekeepingIntegration = lazy(() => import("./pages/admin/TimekeepingIntegration"));
+const AdminDashboard = lazy(() => import("@/features/workspace/ui/dashboard/AdminDashboard"));
+const UserManagement = lazy(() => import("@/features/hr-admin/ui/pages_admin/UserManagement"));
+const RoleManagement = lazy(() => import("@/features/hr-admin/ui/pages_admin/RolePermissionsPage.jsx"));
+const BackupManagement = lazy(() => import("@/features/hr-admin/ui/pages_admin/BackupManagement"));
+const AuditLogsPage = lazy(() => import("@/features/hr-admin/ui/pages_admin/AuditLogsPage.jsx"));
+const SystemConfig = lazy(() => import("@/features/hr-admin/ui/pages_admin/SystemConfig"));
+const HrmIntegration = lazy(() => import("@/features/hr-admin/ui/pages_admin/HrmIntegration"));
+const TimekeepingIntegration = lazy(() => import("@/features/hr-admin/ui/pages_admin/TimekeepingIntegration"));
 
 // Dashboards
-const HrDashboard = lazy(() => import("./pages/dashboard/HrDashboard"));
-const MentorDashboard = lazy(() => import("./pages/dashboard/MentorDashboard"));
-const InternDashboard = lazy(() => import("./pages/dashboard/InternDashboard"));
+const HrDashboard = lazy(() => import("@/features/workspace/ui/dashboard/HrDashboard"));
+const MentorDashboard = lazy(() => import("@/features/workspace/ui/dashboard/MentorDashboard"));
+const InternDashboard = lazy(() => import("@/features/workspace/ui/dashboard/InternDashboard"));
 
 // HR
-const CreateIntern = lazy(() => import("./pages/hr/CreateIntern"));
-const InternList = lazy(() => import("./pages/hr/InternList"));
-const EditIntern = lazy(() => import("./pages/hr/EditIntern"));
-const InternDetail = lazy(() => import("./pages/hr/InternDetail.jsx"));
-const HrDocumentsPage = lazy(() => import("./pages/hr/documents/HrDocumentsPage"));
-const HrUploadInternshipContract = lazy(() => import("./pages/hr/documents/contracts/HrUploadInternshipContract"));
-const Programs = lazy(() => import("./pages/hr/Programs"));
-const Groups = lazy(() => import("./pages/hr/Groups"));
-const MentorList = lazy(() => import("./pages/hr/MentorList"));
-const MentorDetail = lazy(() => import("./pages/hr/MentorDetail"));
-const ApplicationListPage = lazy(() => import("./pages/hr/ApplicationListPage.jsx"));
-const ApplicationDetailPage = lazy(() => import("./pages/hr/ApplicationDetailPage.jsx"));
-const AttendanceReports = lazy(() => import("./pages/hr/AttendanceReports"));
-const LeaveReports = lazy(() => import("./pages/hr/LeaveReports"));
-const LeaveApprovals = lazy(() => import("./pages/hr/LeaveApprovals"));
-const AllowanceManagement = lazy(() => import("./pages/hr/AllowanceManagement"));
-const HelpDesk = lazy(() => import("./pages/hr/HelpDesk"));
-const HrDepartmentsPage = lazy(() => import("./pages/hr/departments/HrDepartmentsPage"));
-const HrReportsPage = lazy(() => import("./pages/hr/reports/HrReportsPage"));
-const FinalReportPage = lazy(() => import("./pages/hr/reports/FinalReportPage"));
-const Statistics = lazy(() => import("./pages/hr/Statistics"));
+const CreateIntern = lazy(() => import("@/features/hr-admin/ui/pages_hr/CreateIntern"));
+const InternList = lazy(() => import("@/features/hr-admin/ui/pages_hr/InternList"));
+const EditIntern = lazy(() => import("@/features/hr-admin/ui/pages_hr/EditIntern"));
+const InternDetail = lazy(() => import("@/features/hr-admin/ui/pages_hr/InternDetail.jsx"));
+const HrDocumentsPage = lazy(() => import("@/features/hr-admin/ui/pages_hr/documents/HrDocumentsPage"));
+const HrUploadInternshipContract = lazy(() => import("@/features/hr-admin/ui/pages_hr/documents/contracts/HrUploadInternshipContract"));
+const Programs = lazy(() => import("@/features/hr-admin/ui/pages_hr/Programs"));
+const Groups = lazy(() => import("@/features/hr-admin/ui/pages_hr/Groups"));
+const MentorList = lazy(() => import("@/features/hr-admin/ui/pages_hr/MentorList"));
+const MentorDetail = lazy(() => import("@/features/hr-admin/ui/pages_hr/MentorDetail"));
+const ApplicationListPage = lazy(() => import("@/features/hr-admin/ui/pages_hr/ApplicationListPage.jsx"));
+const ApplicationDetailPage = lazy(() => import("@/features/hr-admin/ui/pages_hr/ApplicationDetailPage.jsx"));
+const AttendanceReports = lazy(() => import("@/features/hr-admin/ui/pages_hr/AttendanceReports"));
+const LeaveReports = lazy(() => import("@/features/hr-admin/ui/pages_hr/LeaveReports"));
+const LeaveApprovals = lazy(() => import("@/features/hr-admin/ui/pages_hr/LeaveApprovals"));
+const AllowanceManagement = lazy(() => import("@/features/hr-admin/ui/pages_hr/AllowanceManagement"));
+const HelpDesk = lazy(() => import("@/features/hr-admin/ui/pages_hr/HelpDesk"));
+const HrDepartmentsPage = lazy(() => import("@/features/hr-admin/ui/pages_hr/departments/HrDepartmentsPage"));
+const HrReportsPage = lazy(() => import("@/features/hr-admin/ui/pages_hr/reports/HrReportsPage"));
+const FinalReportPage = lazy(() => import("@/features/hr-admin/ui/pages_hr/reports/FinalReportPage"));
+const Statistics = lazy(() => import("@/features/hr-admin/ui/pages_hr/Statistics"));
 
 // Mentor
-const MentorTasksPage = lazy(() => import("./pages/mentor/MentorTasksPage.jsx"));
-const WeeklyReportsReviewPage = lazy(() => import("./pages/mentor/WeeklyReportsReviewPage.jsx"));
-const MentorInternList = lazy(() => import("./pages/mentor/MentorInternList"));
-const InternDetailView = lazy(() => import("./pages/mentor/InternDetailView"));
-const TaskManagement = lazy(() => import("./pages/mentor/TaskManagement"));
-const TaskCreate = lazy(() => import("./pages/mentor/TaskCreate"));
-const TaskDetail = lazy(() => import("./pages/mentor/TaskDetail"));
-const WeeklyReports = lazy(() => import("./pages/mentor/WeeklyReports"));
-const EvaluationCreate = lazy(() => import("./pages/mentor/EvaluationCreate"));
-const EvaluationList = lazy(() => import("./pages/mentor/EvaluationList"));
-const EvaluationDetail = lazy(() => import("./pages/mentor/EvaluationDetail"));
-const ReportDetail = lazy(() => import("./pages/mentor/ReportDetail"));
+const MentorTasksPage = lazy(() => import("@/features/mentor/ui/pages/MentorTasksPage.jsx"));
+const WeeklyReportsReviewPage = lazy(() => import("@/features/mentor/ui/pages/WeeklyReportsReviewPage.jsx"));
+const MentorInternList = lazy(() => import("@/features/mentor/ui/pages/MentorInternList"));
+const InternDetailView = lazy(() => import("@/features/mentor/ui/pages/InternDetailView"));
+const TaskManagement = lazy(() => import("@/features/mentor/ui/pages/TaskManagement"));
+const TaskCreate = lazy(() => import("@/features/mentor/ui/pages/TaskCreate"));
+const TaskDetail = lazy(() => import("@/features/mentor/ui/pages/TaskDetail"));
+const WeeklyReports = lazy(() => import("@/features/mentor/ui/pages/WeeklyReports"));
+const EvaluationCreate = lazy(() => import("@/features/mentor/ui/pages/EvaluationCreate"));
+const EvaluationList = lazy(() => import("@/features/mentor/ui/pages/EvaluationList"));
+const EvaluationDetail = lazy(() => import("@/features/mentor/ui/pages/EvaluationDetail"));
+const ReportDetail = lazy(() => import("@/features/mentor/ui/pages/ReportDetail"));
 
 // Intern
-const MyProfile = lazy(() => import("./pages/interns/MyProfile"));
-const InternDocumentsPage = lazy(() => import("./pages/interns/InternDocumentsPage"));
-const InternContractsPage = lazy(() => import("./pages/interns/InternContractsPage"));
-const ApplicationSubmitPage = lazy(() => import("./pages/interns/ApplicationSubmitPage.jsx"));
-const InternApplicationsPage = lazy(() => import("./pages/interns/InternApplicationsPage.jsx"));
-const MySchedule = lazy(() => import("./pages/interns/MySchedule"));
-const MyTasksPage = lazy(() => import("./pages/interns/MyTasksPage.jsx"));
-const WeeklyReportSubmitPage = lazy(() => import("./pages/interns/WeeklyReportSubmitPage.jsx"));
-const AttendancePage = lazy(() => import("./pages/interns/AttendancePage"));
-const LeaveRequests = lazy(() => import("./pages/interns/LeaveRequests"));
-const MyAllowance = lazy(() => import("./pages/interns/MyAllowance"));
-const SupportTickets = lazy(() => import("./pages/interns/SupportTickets"));
+const MyProfile = lazy(() => import("@/features/intern/ui/pages/MyProfile"));
+const InternDocumentsPage = lazy(() => import("@/features/intern/ui/pages/InternDocumentsPage"));
+const InternContractsPage = lazy(() => import("@/features/intern/ui/pages/InternContractsPage"));
+const ApplicationSubmitPage = lazy(() => import("@/features/intern/ui/pages/ApplicationSubmitPage.jsx"));
+const InternApplicationsPage = lazy(() => import("@/features/intern/ui/pages/InternApplicationsPage.jsx"));
+const MySchedule = lazy(() => import("@/features/intern/ui/pages/MySchedule"));
+const MyTasksPage = lazy(() => import("@/features/intern/ui/pages/MyTasksPage.jsx"));
+const WeeklyReportSubmitPage = lazy(() => import("@/features/intern/ui/pages/WeeklyReportSubmitPage.jsx"));
+const AttendancePage = lazy(() => import("@/features/intern/ui/pages/AttendancePage"));
+const LeaveRequests = lazy(() => import("@/features/intern/ui/pages/LeaveRequests"));
+const MyAllowance = lazy(() => import("@/features/intern/ui/pages/MyAllowance"));
+const SupportTickets = lazy(() => import("@/features/intern/ui/pages/SupportTickets"));
 
 
 function Loader() {

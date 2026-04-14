@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient.js";
+import axiosClient from "@/api/axiosClient.js";
 
 function handleAxiosError(err) {
     // Normalize axios error into thrown Error with codes for caller

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "../../utils/utils"
+import { cn } from "@/utils/utils"
 
 const Timeline = React.forwardRef(({ className, ...props }, ref) => (
     <div ref={ref} className={cn("space-y-4", className)} {...props} />

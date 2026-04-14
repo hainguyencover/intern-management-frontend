@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 // TODO: đổi endpoint theo backend bạn đang có.
 // Ví dụ nếu có: /api/hr/applications?status=APPROVED

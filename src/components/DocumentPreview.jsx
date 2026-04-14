@@ -6,7 +6,7 @@ import {
     DialogHeader,
     DialogTitle
 } from "./ui/dialog";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function DocumentPreview({ url, open, onClose, title = "Xem tài liệu", fileType }) {
     const isPdf = fileType?.includes('pdf') || url?.toLowerCase().endsWith('.pdf');

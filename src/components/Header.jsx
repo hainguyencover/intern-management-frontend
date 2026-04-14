@@ -1,9 +1,9 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
-import NotificationBell from "./common/NotificationBell";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { useAuth } from "@/features/auth/model/AuthContext";
+import NotificationBell from "@/components/common/NotificationBell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Search, ChevronRight, Home } from "lucide-react";
 import {
     Breadcrumb,

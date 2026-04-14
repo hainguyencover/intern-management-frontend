@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "../../utils/utils"
+import { cn } from "@/utils/utils"
 
 const Alert = React.forwardRef(({ className, variant = "default", ...props }, ref) => (
     <div

@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const notificationApi = {
     getAll: (params) => axiosClient.get("/api/v1/notifications", { params }),

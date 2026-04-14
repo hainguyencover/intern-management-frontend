@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const hrCreateGroup = (programId, payload) =>
     axiosClient.post(`/api/v1/hr/programs/${programId}/groups`, payload).then((r) => r.data);

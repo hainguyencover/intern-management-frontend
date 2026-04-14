@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient.js";
+import axiosClient from "@/api/axiosClient.js";
 
 export const programService = {
     // Programs

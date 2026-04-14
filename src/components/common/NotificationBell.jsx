@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Bell, CheckCheck, Inbox } from "lucide-react";
-import { notificationApi } from "../../api/notificationApi";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { ScrollArea } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
+import { notificationApi } from "@/api/notificationApi";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 export default function NotificationBell() {
     const [notifications, setNotifications] = useState([]);

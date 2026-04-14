@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import StatusBadge from "../StatusBadge.jsx";
-import { internDocumentApi } from "../../api/internDocumentApi.js";
-import { useAuth } from "../../auth/AuthContext";
+import StatusBadge from "@/components/StatusBadge.jsx";
+import { internDocumentApi } from "@/api/internDocumentApi.js";
+import { useAuth } from "@/features/auth/model/AuthContext";
 
 const TYPE_LABEL = {
     CV: "CV",

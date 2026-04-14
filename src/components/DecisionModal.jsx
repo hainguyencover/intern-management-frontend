@@ -7,8 +7,8 @@ import {
     DialogDescription,
     DialogFooter
 } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 export default function DecisionModal({ open, onClose, onSubmit, mode = "APPROVE" }) {

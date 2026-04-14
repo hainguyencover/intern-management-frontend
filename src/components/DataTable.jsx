@@ -7,8 +7,8 @@ import {
     TableHeader,
     TableRow
 } from "./ui/table";
-import { Skeleton } from "./ui/skeleton";
-import EmptyState from "./EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
+import EmptyState from "@/components/EmptyState";
 
 export default function DataTable({
     columns,

@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const hrListApplications = async ({ page = 0, size = 10, status = "", q = "" }) => {
     const params = { page, size };

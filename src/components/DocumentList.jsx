@@ -7,12 +7,12 @@ import {
     TableHeader,
     TableRow
 } from "./ui/table";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Eye, Trash2, FileText, Download, Calendar, MessageSquare } from "lucide-react";
-import StatusBadge from "./StatusBadge";
-import { documentApi } from "../api/documentApi";
+import StatusBadge from "@/components/StatusBadge";
+import { documentApi } from "@/api/documentApi";
 import { toast } from "sonner";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DocumentList({ documents, onDelete, loading }) {
     const handleView = async (docId) => {

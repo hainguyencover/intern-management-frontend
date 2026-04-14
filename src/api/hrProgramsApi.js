@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const hrCreateProgram = (payload) =>
     axiosClient.post("/api/v1/hr/programs", payload).then((r) => r.data);

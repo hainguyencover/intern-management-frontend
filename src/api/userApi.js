@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const userApi = {
     createUser: (userData) => axiosClient.post("/api/v1/users", userData),

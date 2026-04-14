@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "@/api/axiosClient";
 
 export const groupApi = {
     list: (params) => axiosClient.get("/api/v1/program-groups", { params }),

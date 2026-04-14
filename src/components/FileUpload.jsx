@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { UploadCloud, File, X, Check, AlertCircle } from "lucide-react";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 export default function FileUpload({
