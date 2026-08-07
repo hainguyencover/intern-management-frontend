@@ -27,7 +27,8 @@ import {
     HelpCircle,
     Settings,
     Shield,
-    HeartPulse
+    HeartPulse,
+    Sparkles
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -96,6 +97,8 @@ export default function Sidebar() {
                     { label: "Duyệt nghỉ phép", to: "/hr/leave-approvals", icon: CalendarCheck },
                     { label: "Phụ cấp", to: "/hr/allowances", icon: Database },
                     { label: "Thống kê", to: "/hr/statistics", icon: BarChart3 },
+                    { label: "AI Matching", to: "/hr/matching", icon: Sparkles },
+                    { label: "AI Analytics", to: "/hr/analytics", icon: TrendingUp },
                 ]
             });
         }

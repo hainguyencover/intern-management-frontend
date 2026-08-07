@@ -1,10 +1,1 @@
-import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "@/features/auth/model/authSlice";
-
-const store = configureStore({
-  reducer: {
-    auth: authReducer,
-  },
-});
-
-export default store;
+// Cleaned: Legacy Redux store.js replaced by Pinia stores in src/modules/*/store/

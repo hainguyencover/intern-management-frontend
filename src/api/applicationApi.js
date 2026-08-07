@@ -16,7 +16,8 @@ export const applicationApi = {
     pending: (params) => axiosClient.get("/api/v1/documents/pending", { params }),
     verify: (id, decision) => axiosClient.post(`/api/v1/documents/${id}/verify`, decision),
     getByIntern: (internId) => axiosClient.get(`/api/v1/documents/intern/${internId}`),
-    download: (id) => axiosClient.get(`/api/v1/documents/${id}/download`, {
+    download: (id) => axiosClient.get(`/api/v1/applications/${id}/download`, {
         responseType: 'blob'
     }),
+    rescanAi: (id) => axiosClient.post(`/api/v1/applications/${id}/ai-rescan`),
 };
