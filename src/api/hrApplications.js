@@ -1,12 +1,14 @@
 import axiosClient from "@/api/axiosClient";
 
-export const hrListApplications = async ({ page = 0, size = 10, status = "", q = "" }) => {
+export const hrListApplications = async ({ page = 0, size = 10, status = "", q = "", keyword = "" }) => {
     const params = { page, size };
     if (status) params.status = status;
-    if (q) params.q = q;
+    const searchKeyword = keyword || q;
+    if (searchKeyword) params.keyword = searchKeyword;
     const res = await axiosClient.get("/api/v1/hr/applications", { params });
     return res.data;
 };
+
 
 export const hrGetApplicationDetail = async (id) => {
     const res = await axiosClient.get(`/api/v1/hr/applications/${id}`);

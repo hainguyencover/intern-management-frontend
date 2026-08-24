@@ -63,12 +63,17 @@
       :loading="loading"
       :row-key="rowKey"
       :selection="selectable ? 'multiple' : 'none'"
+      :rows-per-page-options="[5, 10, 20, 50]"
+      :pagination="pagination"
+      :pagination-label="(first, end, total) => `${first}-${end}/${total}`"
       flat
       bordered
+      dense
       class="sticky-header-table"
       role="grid"
       tabindex="0"
       aria-label="Bảng dữ liệu nghiệp vụ"
+      @request="onRequest"
       @keydown.up.prevent="navigateRow(-1)"
       @keydown.down.prevent="navigateRow(1)"
       @keydown.space.prevent="toggleCurrentRowSelection"
@@ -94,6 +99,7 @@ const props = withDefaults(
     rowKey?: string;
     selectable?: boolean;
     bulkActions?: BulkAction<T>[];
+    pagination?: any;
   }>(),
   {
     loading: false,
@@ -102,6 +108,14 @@ const props = withDefaults(
     bulkActions: () => []
   }
 );
+
+const emit = defineEmits<{
+  (e: 'request', requestProps: any): void;
+}>();
+
+function onRequest(requestProps: any) {
+  emit('request', requestProps);
+}
 
 const selectedRows = ref<T[]>([]) as { value: T[] };
 const allColumns = ref([...props.columns]);
@@ -159,5 +173,26 @@ function toggleCurrentRowSelection() {
   top: 0;
   z-index: 1;
   background-color: #f5f5f5;
+}
+
+.sticky-header-table :deep(.q-table__bottom) {
+  padding: 2px 8px;
+  min-height: 34px;
+  font-size: 12px;
+}
+
+.sticky-header-table :deep(.q-table__select) {
+  min-width: 45px;
+}
+
+.sticky-header-table :deep(.q-field--auto-height .q-field__control) {
+  min-height: 24px;
+  height: 24px;
+  padding: 0 2px;
+}
+
+/* Hide verbose 'Records per page:' text label to keep pagination ultra-compact */
+.sticky-header-table :deep(.q-table__bottom .q-table__control:first-child > span:first-child) {
+  display: none !important;
 }
 </style>

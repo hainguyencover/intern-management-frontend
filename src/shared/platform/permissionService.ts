@@ -11,7 +11,9 @@ export class PermissionResolverService {
 
   hasRole(role: string): boolean {
     const authStore = useAuthStore();
-    return authStore.roles.includes(role);
+    if (!authStore.roles || authStore.roles.length === 0) return false;
+    const targetRole = role.toUpperCase().replace('ROLE_', '');
+    return authStore.roles.some(r => r.toUpperCase().replace('ROLE_', '') === targetRole);
   }
 }
 

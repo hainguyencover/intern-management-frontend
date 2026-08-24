@@ -7,6 +7,7 @@ export interface MenuItemConfig {
   to: string;
   permission?: string;
   role?: string;
+  roles?: string[];
   featureFlag?: string;
   order?: number;
 }

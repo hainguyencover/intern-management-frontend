@@ -1,36 +1,30 @@
 import { apiClient } from '../../../shared/api/client';
 import type { LoginRequest, JwtResponseDto, AuthenticatedUser } from '../models/auth';
 
-/**
- * AuthService — Tầng dịch vụ HTTP duy nhất cho nghiệp vụ xác thực.
- *
- * Trách nhiệm:
- * - Giao tiếp HTTP với Backend Auth API.
- * - Quản lý Access Token trong bộ nhớ (in-memory, không persist).
- * - Cung cấp getter/setter cho Axios interceptor.
- *
- * Refresh Token do Backend quản lý hoàn toàn qua HttpOnly Cookie.
- * Frontend KHÔNG BAO GIỜ chạm vào Refresh Token.
- */
-
-// ─── In-memory token storage (private) ────────────────────
 let accessToken: string | null = null;
 
-// ─── Public API ───────────────────────────────────────────
-
 export function getAccessToken(): string | null {
+  if (!accessToken) {
+    accessToken = localStorage.getItem('accessToken');
+  }
   return accessToken;
 }
 
 export function setAccessToken(token: string): void {
   accessToken = token;
+  if (token) {
+    localStorage.setItem('accessToken', token);
+  } else {
+    localStorage.removeItem('accessToken');
+  }
 }
 
 export function clearToken(): void {
   accessToken = null;
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
 }
-
-// ─── Mapper: DTO → Domain Model ──────────────────────────
 
 function mapJwtResponseToUser(dto: JwtResponseDto): AuthenticatedUser {
   return {
@@ -39,30 +33,87 @@ function mapJwtResponseToUser(dto: JwtResponseDto): AuthenticatedUser {
   };
 }
 
-// ─── HTTP Methods ─────────────────────────────────────────
-
 export async function login(payload: LoginRequest): Promise<AuthenticatedUser> {
-  const response = await apiClient.post<JwtResponseDto>('/api/v1/auth/login', payload, {
-    withCredentials: true // Backend sets HttpOnly Cookie for refresh token
+  const response = await apiClient.post<any>('/api/v1/auth/login', payload, {
+    withCredentials: true
   });
 
-  const dto = response.data;
+  const rawData = response.data?.data || response.data;
+  const token = rawData.token || rawData.accessToken;
 
-  // Lưu access token vào bộ nhớ (in-memory only)
-  setAccessToken(dto.accessToken);
+  if (token) {
+    setAccessToken(token);
+    if (rawData.refreshToken) {
+      localStorage.setItem('refreshToken', rawData.refreshToken);
+    }
+  }
 
-  return mapJwtResponseToUser(dto);
+  return {
+    id: rawData.id,
+    email: rawData.email,
+    fullName: rawData.fullName,
+    roles: rawData.roles ?? [],
+    permissions: rawData.permissions ?? [],
+    emailVerified: rawData.emailVerified ?? false
+  };
+}
+
+export async function register(payload: import('../models/auth').RegisterRequest): Promise<AuthenticatedUser> {
+  const response = await apiClient.post<any>('/api/v1/auth/register', payload, {
+    withCredentials: true
+  });
+
+  const rawData = response.data?.data || response.data;
+  const token = rawData.token || rawData.accessToken;
+
+  if (token) {
+    setAccessToken(token);
+    if (rawData.refreshToken) {
+      localStorage.setItem('refreshToken', rawData.refreshToken);
+    }
+  }
+
+  return {
+    id: rawData.id,
+    email: rawData.email,
+    fullName: rawData.fullName,
+    roles: rawData.roles ?? [],
+    permissions: rawData.permissions ?? [],
+    emailVerified: false
+  };
+}
+
+export async function verifyEmail(token: string): Promise<void> {
+  await apiClient.post('/api/v1/auth/email-verification/verify', { token });
+}
+
+export async function resendVerification(email: string): Promise<void> {
+  await apiClient.post('/api/v1/auth/email-verification/resend', { email });
 }
 
 export async function getProfile(): Promise<AuthenticatedUser> {
-  const response = await apiClient.get<JwtResponseDto>('/api/v1/auth/me', {
+  const token = getAccessToken();
+  if (token) {
+    setAccessToken(token);
+  }
+
+  const response = await apiClient.get<any>('/api/v1/auth/me', {
     withCredentials: true
   });
-  const dto = response.data;
-  if (dto.accessToken) {
-    setAccessToken(dto.accessToken);
+  const rawData = response.data?.data || response.data;
+  const newToken = rawData.token || rawData.accessToken;
+  if (newToken) {
+    setAccessToken(newToken);
   }
-  return mapJwtResponseToUser(dto);
+  return {
+    id: rawData.id,
+    email: rawData.email,
+    fullName: rawData.fullName,
+    roles: rawData.roles ?? [],
+    permissions: rawData.permissions ?? [],
+    emailVerified: rawData.emailVerified ?? false,
+    applicationStatus: rawData.applicationStatus || rawData.status || rawData.internProfileStatus || (rawData.roles?.includes('INTERN') ? 'INTERNING' : '')
+  };
 }
 
 export async function logout(): Promise<void> {

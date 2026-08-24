@@ -4,9 +4,10 @@
   "description": "HoLaHo Intern Management System Frontend",
   "productName": "HoLaHo IMS",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "quasar dev",
-    "build": "quasar build",
+    "dev": "vite",
+    "build": "vite build",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,json,md}\"",
     "test:unit": "vitest",
@@ -15,15 +16,23 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "axios": "^1.6.0",
+    "apexcharts": "^3.45.0",
     "pinia": "^2.1.7",
     "quasar": "^2.14.0",
+    "vee-validate": "^4.12.0",
     "vue": "^3.3.4",
+    "vue3-apexcharts": "^1.5.0",
     "vue-i18n": "^9.8.0",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "zod": "^3.22.4",
+    "@vee-validate/zod": "^4.12.0"
   },
   "devDependencies": {
     "@quasar/app-vite": "^1.6.0",
+    "@quasar/vite-plugin": "^1.12.0",
     "@types/node": "^20.9.0",
+    "@vitejs/plugin-vue": "^4.6.2",
+    "@vue/test-utils": "^2.4.4",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.53.0",
     "eslint-config-prettier": "^9.0.0",

@@ -31,6 +31,18 @@
         :loading="loading"
         selectable
       >
+        <template #body-cell-totalScore="props">
+          <q-td :props="props">
+            <q-chip
+              dense
+              :color="props.value >= 6.5 ? 'positive' : 'warning'"
+              text-color="white"
+              size="sm"
+            >
+              {{ props.value || 0 }} ({{ (props.value || 0) >= 6.5 ? 'ĐẠT (BR-04)' : 'CHƯA ĐẠT' }})
+            </q-chip>
+          </q-td>
+        </template>
         <template #body-cell-actions="props">
           <q-td :props="props" class="q-gutter-x-xs">
             <q-btn flat round dense icon="thumb_up" color="positive" @click="handleStatusChange(props.row, 'APPROVED')" />

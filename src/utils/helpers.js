@@ -1,13 +1,11 @@
-import dayjs from "dayjs";
-import { DATE_FORMAT, DATETIME_FORMAT } from "@/utils/constants";
-
-export const formatDate = (date, format = DATE_FORMAT) => {
+export const formatDate = (date) => {
     if (!date) return "";
-    return dayjs(date).format(format);
+    return new Date(date).toLocaleDateString('vi-VN');
 };
 
 export const formatDateTime = (date) => {
-    return formatDate(date, DATETIME_FORMAT);
+    if (!date) return "";
+    return new Date(date).toLocaleString('vi-VN');
 };
 
 export const downloadFile = (blob, filename) => {

@@ -1,5 +1,5 @@
 import type { Directive, DirectiveBinding } from 'vue';
-import { useAuthStore } from '../../modules/auth/store/authStore';
+import { useAuthStore } from '@/stores/auth.store';
 
 export const vRole: Directive = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
@@ -8,12 +8,7 @@ export const vRole: Directive = {
 
     if (!value) return;
 
-    let hasRole = false;
-    if (Array.isArray(value)) {
-      hasRole = value.some((role) => authStore.roles.includes(role));
-    } else if (typeof value === 'string') {
-      hasRole = authStore.roles.includes(value);
-    }
+    const hasRole = authStore.hasRole(value);
 
     if (!hasRole) {
       el.parentNode?.removeChild(el);

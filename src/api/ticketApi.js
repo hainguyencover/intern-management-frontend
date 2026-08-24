@@ -1,38 +1,45 @@
 import axiosClient from "@/api/axiosClient";
 
 export const ticketApi = {
-    // Shared
+    // Shared & Intern actions
     create: (data) => {
-        // Backend expects: category, title, content
         return axiosClient.post("/api/v1/support-tickets", data);
     },
     createTicket: (data) => {
         return axiosClient.post("/api/v1/support-tickets", data);
     },
-    updateTicket: (id, data) => {
-        return axiosClient.put(`/api/v1/support-tickets/${id}`, data);
+    getMyTickets: (params) => {
+        return axiosClient.get("/api/v1/support-tickets/me", { params });
     },
-    deleteTicket: (id) => {
-        return axiosClient.delete(`/api/v1/support-tickets/${id}`);
+    getById: (id) => {
+        return axiosClient.get(`/api/v1/support-tickets/${id}`);
     },
-    reply: (id, content) => {
-        // Backend expects: content (in TicketCommentRequest)
-        return axiosClient.post(`/api/v1/support-tickets/${id}/comments`, { content });
+
+    // HR & Admin actions
+    getAllTickets: (params) => {
+        return axiosClient.get("/api/v1/support-tickets", { params });
+    },
+    assign: (id, assignedToId) => {
+        return axiosClient.post(`/api/v1/support-tickets/${id}/assign`, { assignedToId });
+    },
+    updateStatus: (id, status) => {
+        return axiosClient.put(`/api/v1/support-tickets/${id}/status`, { status });
+    },
+    resolve: (id, resolution) => {
+        return axiosClient.post(`/api/v1/support-tickets/${id}/resolve`, { resolution });
+    },
+    close: (id) => {
+        return axiosClient.post(`/api/v1/support-tickets/${id}/close`);
+    },
+
+    // Discussion & Attachments
+    reply: (id, content, isInternal = false) => {
+        return axiosClient.post(`/api/v1/support-tickets/${id}/comments`, { content, isInternal });
     },
     getComments: (id) => {
         return axiosClient.get(`/api/v1/support-tickets/${id}/comments`);
     },
-
-    // Intern actions
-    getMyTickets: () => {
-        return axiosClient.get("/api/v1/support-tickets/me");
-    },
-
-    // HR actions
-    getAllTickets: (params) => {
-        return axiosClient.get("/api/v1/support-tickets", { params });
-    },
-    updateStatus: (id, status) => {
-        return axiosClient.put(`/api/v1/support-tickets/${id}/status`, { status });
+    addAttachment: (id, params) => {
+        return axiosClient.post(`/api/v1/support-tickets/${id}/attachments`, null, { params });
     }
 };

@@ -11,9 +11,27 @@ import type { PageResponse } from '../../intern/models/intern';
 
 export async function fetchTasks(query?: any): Promise<PageResponse<Task>> {
   try {
-    const response = await apiClient.get<PageResponse<Task>>('/api/v1/tasks', { params: query });
-    return response.data;
+    const pageNum = query?.page !== undefined ? query.page : 1;
+    const apiParams = {
+      page: pageNum - 1, // 1-based frontend page to 0-based backend page
+      size: query?.limit || 10,
+      search: query?.search || '',
+      status: query?.status || ''
+    };
+    const response = await apiClient.get<any>('/api/v1/tasks', { params: apiParams });
+    const resData = response.data?.data || response.data;
+    const contentList = Array.isArray(resData) ? resData : (resData?.content || []);
+    const meta = response.data?.meta;
+
+    return {
+      content: contentList,
+      page: meta?.page || (resData?.number || 0) + 1,
+      limit: meta?.size || resData?.size || 10,
+      totalElements: meta?.totalElements !== undefined ? meta.totalElements : (resData?.totalElements || contentList.length),
+      totalPages: meta?.totalPages !== undefined ? meta.totalPages : (resData?.totalPages || 1)
+    };
   } catch (error) {
+
     const mockTasks: Task[] = [
       {
         id: 'task-1',
@@ -79,10 +97,15 @@ export async function fetchTasks(query?: any): Promise<PageResponse<Task>> {
 }
 
 export async function createTask(payload: CreateTaskPayload): Promise<Task> {
+  const reqPayload = {
+    ...payload,
+    assigneeId: payload.assigneeId ? Number(payload.assigneeId) : null
+  };
   try {
-    const response = await apiClient.post<Task>('/api/v1/tasks', payload);
-    return response.data;
+    const response = await apiClient.post<any>('/api/v1/tasks', reqPayload);
+    return response.data?.data || response.data;
   } catch (error) {
+
     return {
       id: 'task-' + Date.now(),
       code: 'TSK-' + Math.floor(Math.random() * 1000),

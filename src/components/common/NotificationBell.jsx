@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "react-router-dom";
 
 export default function NotificationBell() {
     const [notifications, setNotifications] = useState([]);
@@ -14,18 +15,23 @@ export default function NotificationBell() {
 
     useEffect(() => {
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 60000);
+        const interval = setInterval(fetchNotifications, 30000);
         return () => clearInterval(interval);
     }, []);
 
     const fetchNotifications = async () => {
         try {
-            const [unreadRes, countRes] = await Promise.all([
-                notificationApi.getUnread(),
+            const [listRes, countRes] = await Promise.all([
+                notificationApi.getAll({ page: 0, size: 10 }),
                 notificationApi.getUnreadCount()
             ]);
-            setNotifications(unreadRes.data || []);
-            setUnreadCount(countRes.data || 0);
+            const pageData = listRes.data?.data || listRes.data || {};
+            const items = pageData.content || (Array.isArray(listRes.data) ? listRes.data : []);
+            const cntData = countRes.data?.data || countRes.data || {};
+            const countVal = cntData.count !== undefined ? cntData.count : (typeof cntData === "number" ? cntData : 0);
+
+            setNotifications(items);
+            setUnreadCount(countVal);
         } catch (error) {
             console.error("Failed to fetch notifications", error);
         }
@@ -35,9 +41,21 @@ export default function NotificationBell() {
         try {
             await notificationApi.markAllAsRead();
             setUnreadCount(0);
-            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setNotifications(prev => prev.map(n => ({ ...n, status: 'READ' })));
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const handleItemClick = async (notification) => {
+        if (notification.status === 'UNREAD') {
+            try {
+                await notificationApi.markAsRead(notification.id);
+                setUnreadCount(prev => Math.max(0, prev - 1));
+                setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, status: 'READ' } : n));
+            } catch (err) {
+                console.error(err);
+            }
         }
     };
 
@@ -72,39 +90,39 @@ export default function NotificationBell() {
                         </div>
                     ) : (
                         <div className="divide-y divide-border">
-                            {notifications.map((n) => (
-                                <div key={n.id} className={cn(
-                                    "group relative flex flex-col gap-1 p-4 transition-colors hover:bg-slate-50",
-                                    !n.read && "bg-blue-50/30 font-medium"
-                                )}>
-                                    {!n.read && (
-                                        <div className="absolute left-1 top-5 h-1.5 w-1.5 rounded-full bg-primary" />
-                                    )}
-                                    <div className="text-sm text-slate-900 leading-tight">{n.title}</div>
-                                    <p className="text-xs text-muted-foreground line-clamp-2">{n.content}</p>
-                                    <span className="text-[10px] text-slate-400 mt-1">
-                                        {new Date(n.createdAt).toLocaleString('vi-VN')}
-                                    </span>
-                                </div>
-                            ))}
+                            {notifications.map((n) => {
+                                const isUnread = n.status === 'UNREAD';
+                                return (
+                                    <div
+                                        key={n.id}
+                                        onClick={() => handleItemClick(n)}
+                                        className={`group relative flex flex-col gap-1 p-4 cursor-pointer transition-colors hover:bg-slate-50 ${
+                                            isUnread ? "bg-blue-50/40 font-medium" : ""
+                                        }`}
+                                    >
+                                        {isUnread && (
+                                            <div className="absolute left-1.5 top-5 h-2 w-2 rounded-full bg-primary" />
+                                        )}
+                                        <div className="text-sm text-slate-900 leading-tight">{n.title}</div>
+                                        <p className="text-xs text-muted-foreground line-clamp-2">{n.message || n.content}</p>
+                                        <span className="text-[10px] text-slate-400 mt-1">
+                                            {n.createdAt ? new Date(n.createdAt).toLocaleString('vi-VN') : ''}
+                                        </span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </ScrollArea>
                 <Separator />
                 <div className="p-2 text-center">
-                    <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground">
-                        Xem tất cả thông báo
-                    </Button>
+                    <Link to="/notifications" onClick={() => setIsOpen(false)}>
+                        <Button variant="ghost" size="sm" className="w-full text-xs text-primary">
+                            Xem tất cả thông báo
+                        </Button>
+                    </Link>
                 </div>
             </PopoverContent>
         </Popover>
     );
 }
-
-const cn = (...inputs) => {
-    // Helper to avoid circular dependency in this chunk if needed, 
-    // but better use the global one. Since I'm replacing the whole file,
-    // I'll just import it correctly or define locally if I must.
-    // I already have utils/utils.js. I'll import it.
-    return inputs.filter(Boolean).join(" ");
-};

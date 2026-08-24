@@ -22,10 +22,11 @@ import {
     BookOpen,
     Building,
     FileText,
-    Settings
+    Settings,
+    Award
 } from "lucide-react";
 import { internApi } from "@/features/intern/api/internApi";
-import { documentApi } from "@/api/documentApi";
+import { internDocumentApi } from "@/api/internDocumentApi";
 import StatusBadge from "@/components/StatusBadge";
 import DocumentPreview from "@/components/DocumentPreview";
 import { toast } from "sonner";
@@ -74,12 +75,12 @@ export default function InternDetail() {
             setLoading(true);
             const [internRes, docsRes] = await Promise.all([
                 internApi.getById(internId),
-                documentApi.getByIntern(internId),
+                internDocumentApi.getInternDocuments({ internId }),
             ]);
             setIntern(internRes.data);
-            setDocuments(docsRes.data || []);
+            setDocuments(docsRes.data || docsRes || []);
         } catch (err) {
-            toast.error("Resource acquisition failed");
+            toast.error("Không thể tải hồ sơ thực tập sinh");
             navigate("/hr/interns");
         } finally {
             setLoading(false);
@@ -92,30 +93,41 @@ export default function InternDetail() {
 
     const handleVerify = async () => {
         if (!selectedDoc || !decision) return;
+        if (decision === "REJECT" && (!note || !note.trim())) {
+            toast.error("Vui lòng nhập lý do từ chối tài liệu!");
+            return;
+        }
+
         try {
-            await documentApi.verify(selectedDoc.id, { decision, note });
-            toast.success(decision === "APPROVE" ? "Credential Authenticated" : "Credential Revoked");
+            if (decision === "APPROVE") {
+                await internDocumentApi.approveDocument({ id: selectedDoc.id });
+                toast.success("Phê duyệt tài liệu thành công");
+            } else {
+                await internDocumentApi.rejectDocument({ id: selectedDoc.id, reason: note.trim() });
+                toast.success("Từ chối tài liệu thành công");
+            }
             setVerifyModal(false);
             setSelectedDoc(null);
             setDecision("");
             setNote("");
             await fetchData();
         } catch (err) {
-            toast.error(err.response?.data?.message || "Governance error");
+            toast.error(err.backendMessage || err.message || "Xử lý thất bại");
         }
     };
 
     const handleView = async (doc) => {
         try {
-            const res = await documentApi.download(doc.id);
-            const blob = new Blob([res.data], { type: res.headers["content-type"] });
+            const res = await internDocumentApi.downloadDocument({ id: doc.id, isHr: true });
+            const contentType = res.headers["content-type"] || "application/pdf";
+            const blob = new Blob([res.data], { type: contentType });
             const url = window.URL.createObjectURL(blob);
             setPreviewUrl(url);
             setPreviewTitle(doc.type);
-            setPreviewFileType(res.headers["content-type"]);
+            setPreviewFileType(contentType);
             setPreviewVisible(true);
         } catch (err) {
-            toast.error("Preview unavailable.");
+            toast.error("Không thể xem trước tài liệu.");
         }
     };
 
@@ -132,7 +144,7 @@ export default function InternDetail() {
         return (
             <div className="p-20 flex flex-col items-center justify-center space-y-4">
                 <div className="h-16 w-16 rounded-full border-4 border-slate-100 border-t-slate-900 animate-spin" />
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Synchronizing Personnel Profile...</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Đang tải hồ sơ thực tập sinh...</p>
             </div>
         );
     }
@@ -141,7 +153,7 @@ export default function InternDetail() {
         return (
             <div className="p-20 flex flex-col items-center justify-center space-y-4 text-center">
                 <AlertCircle className="h-20 w-20 text-slate-200" />
-                <p className="text-slate-400 font-black uppercase tracking-widest text-sm italic">Intern registry is currently vacant or resource is locked.</p>
+                <p className="text-slate-400 font-black uppercase tracking-widest text-sm italic">Không tìm thấy thông tin thực tập sinh.</p>
             </div>
         );
     }
@@ -156,7 +168,7 @@ export default function InternDetail() {
                         onClick={() => navigate(-1)}
                         className="h-9 px-3 rounded-xl text-slate-400 hover:text-slate-900 font-black text-[10px] uppercase tracking-widest group"
                     >
-                        <ChevronLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to Personnel Registry
+                        <ChevronLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> Trở về danh sách
                     </Button>
                     <div className="flex items-start gap-6">
                         <div className="h-24 w-24 rounded-[2.5rem] bg-slate-900 flex items-center justify-center text-white shadow-2xl relative overflow-hidden group">
@@ -169,11 +181,11 @@ export default function InternDetail() {
                                     {intern.fullName}
                                 </h1>
                                 <Badge className="bg-primary/10 text-primary border-none font-black text-[9px] uppercase tracking-[0.2em] h-5">
-                                    INTERN_ASSET
+                                    THỰC TẬP SINH
                                 </Badge>
                             </div>
                             <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.3em] flex items-center gap-2">
-                                <Activity className="h-3 w-3 text-emerald-500" /> Active System Status
+                                <Activity className="h-3 w-3 text-emerald-500" /> Hồ sơ hoạt động
                             </p>
                             <div className="flex items-center gap-4 mt-4">
                                 <Badge variant="outline" className="h-8 px-4 rounded-xl border-slate-100 bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-widest">
@@ -186,14 +198,9 @@ export default function InternDetail() {
                     </div>
                 </div>
                 <div className="flex gap-4">
-                    <Button variant="outline" asChild className="h-14 px-8 rounded-2xl border-slate-200 font-black text-[11px] uppercase tracking-widest text-slate-400 hover:text-slate-900 hover:bg-white shadow-xl shadow-slate-100 transition-all">
-                        <Link to={`/hr/interns/${internId}/edit`}>
-                            <Settings className="mr-2 h-4 w-4" /> System Overrides
-                        </Link>
-                    </Button>
                     <Button asChild className="h-14 px-10 rounded-2xl bg-slate-900 border-none hover:bg-black font-black text-[11px] uppercase tracking-widest text-white shadow-2xl shadow-slate-200 transition-all active:scale-95">
                         <Link to={`/hr/interns/${internId}/edit`}>
-                            <Edit3 className="mr-2 h-5 w-5" /> RECONFIG_PROFILE
+                            <Edit3 className="mr-2 h-5 w-5" /> CẬP NHẬT HỒ SƠ
                         </Link>
                     </Button>
                 </div>
@@ -206,8 +213,8 @@ export default function InternDetail() {
                         <CardHeader className="p-10 pb-4 border-b border-slate-50">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tighter italic">Tactical Demographics</CardTitle>
-                                    <CardDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">Core identification and contact parameters</CardDescription>
+                                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tighter italic">Thông tin cá nhân</CardTitle>
+                                    <CardDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">Thông tin định danh và liên hệ chính thức</CardDescription>
                                 </div>
                                 <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
                                     <ShieldCheck className="h-6 w-6" />
@@ -222,7 +229,7 @@ export default function InternDetail() {
                                             <Mail className="h-4 w-4" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">ACCESS_KEY</span>
+                                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">EMAIL</span>
                                             <span className="text-sm font-bold text-slate-900">{intern.email}</span>
                                         </div>
                                     </div>
@@ -231,7 +238,7 @@ export default function InternDetail() {
                                             <Phone className="h-4 w-4" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">SECURE_LINE</span>
+                                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">SỐ ĐIỆN THOẠI</span>
                                             <span className="text-sm font-bold text-slate-900">{intern.phone || "N/A"}</span>
                                         </div>
                                     </div>
@@ -240,7 +247,7 @@ export default function InternDetail() {
                                             <Calendar className="h-4 w-4" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">EPOCH_DATE</span>
+                                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">NGÀY SINH</span>
                                             <span className="text-sm font-bold text-slate-900">{intern.dob || "N/A"}</span>
                                         </div>
                                     </div>
@@ -251,7 +258,7 @@ export default function InternDetail() {
                                             <MapPin className="h-5 w-5" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">GEO_LOCATION</span>
+                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">ĐỊA CHỈ THƯỜNG TRÚ</span>
                                             <p className="text-sm font-bold mt-1 leading-relaxed italic">{intern.address || "N/A"}</p>
                                         </div>
                                     </div>
@@ -264,8 +271,8 @@ export default function InternDetail() {
                         <CardHeader className="p-10 pb-4 border-b border-slate-50">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tighter italic">Educational Credentials</CardTitle>
-                                    <CardDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">Academic baseline and performance metrics</CardDescription>
+                                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tighter italic">Học vấn & Trình độ</CardTitle>
+                                    <CardDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">Thông tin trường đại học và chuyên ngành</CardDescription>
                                 </div>
                                 <div className="h-12 w-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
                                     <GraduationCap className="h-6 w-6" />
@@ -279,7 +286,7 @@ export default function InternDetail() {
                                         <School className="h-5 w-5" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">INSTITUTION</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">TRƯỜNG ĐẠI HỌC</span>
                                         <span className="text-sm font-black text-slate-900 mt-1">{intern.university || "N/A"}</span>
                                     </div>
                                 </div>
@@ -288,7 +295,7 @@ export default function InternDetail() {
                                         <BookOpen className="h-5 w-5" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DISCIPLINE</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">CHUYÊN NGÀNH</span>
                                         <span className="text-sm font-black text-slate-900 mt-1 line-clamp-1">{intern.major || "N/A"}</span>
                                     </div>
                                 </div>
@@ -297,10 +304,10 @@ export default function InternDetail() {
                                         <Target className="h-5 w-5" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">METRIC_GPA</span>
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">ĐIỂM GPA</span>
                                         <div className="flex items-center gap-3 mt-1">
                                             <span className="text-3xl font-black italic">{intern.gpa || "N/A"}</span>
-                                            <Badge className="bg-emerald-500/20 text-emerald-400 border-none font-black text-[10px]">ELITE</Badge>
+                                            <Badge className="bg-emerald-500/20 text-emerald-400 border-none font-black text-[10px]">ĐẠT</Badge>
                                         </div>
                                     </div>
                                 </div>
@@ -314,14 +321,14 @@ export default function InternDetail() {
                     <Card className="border-none shadow-2xl shadow-slate-100 rounded-[2.5rem] overflow-hidden bg-slate-900 text-white">
                         <CardHeader className="p-8 pb-4">
                             <CardTitle className="text-sm uppercase tracking-[0.2em] opacity-40 italic flex items-center gap-2">
-                                <FileCheck className="h-4 w-4 text-emerald-500" /> SECURE DOCUMENTS
+                                <FileCheck className="h-4 w-4 text-emerald-500" /> TÀI LIỆU HỒ SƠ
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-8 pt-0 space-y-4">
                             {documents.length === 0 ? (
                                 <div className="py-12 text-center opacity-20 flex flex-col items-center gap-4">
                                     <FileText className="h-12 w-12" />
-                                    <p className="text-[10px] uppercase font-black">Archive Empty</p>
+                                    <p className="text-[10px] uppercase font-black">Chưa nộp tài liệu nào</p>
                                 </div>
                             ) : documents.map((doc) => (
                                 <div key={doc.id} className="group p-5 rounded-[1.5rem] bg-white/5 border border-white/5 hover:bg-white/10 transition-all duration-300">
@@ -332,7 +339,9 @@ export default function InternDetail() {
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="text-xs font-black tracking-tight">{doc.type}</span>
-                                                <span className="text-[8px] uppercase tracking-widest opacity-40">VALIDATED ON_CHAIN</span>
+                                                <span className="text-[9px] uppercase tracking-widest text-slate-400">
+                                                    {doc.originalFileName || doc.fileName || 'file.pdf'}
+                                                </span>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
@@ -361,50 +370,13 @@ export default function InternDetail() {
                                     </div>
                                     <div className="mt-4 flex items-center justify-between">
                                         <StatusBadge status={doc.status} />
-                                        <span className="text-[8px] opacity-20">0x{doc.id.slice(0, 8)}...</span>
+                                        <span className="text-[10px] text-slate-400 font-normal">
+                                            {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : ''}
+                                        </span>
                                     </div>
                                 </div>
                             ))}
                         </CardContent>
-                    </Card>
-
-                    <Card className="border-none shadow-2xl shadow-primary/5 rounded-[2.5rem] bg-indigo-600 text-white p-10 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-700">
-                            <Award className="h-24 w-24" />
-                        </div>
-                        <div className="relative z-10 space-y-6">
-                            <h3 className="text-2xl font-black italic tracking-tighter">Strategic Value</h3>
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] opacity-60 font-black">
-                                        <span>Tech_Aptitude</span>
-                                        <span>88%</span>
-                                    </div>
-                                    <div className="h-1 w-full bg-white/10 rounded-full">
-                                        <div className="h-full w-[88%] bg-amber-400 rounded-full" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] opacity-60 font-black">
-                                        <span>Soft_Engagement</span>
-                                        <span>92%</span>
-                                    </div>
-                                    <div className="h-1 w-full bg-white/10 rounded-full">
-                                        <div className="h-full w-[92%] bg-primary rounded-full" />
-                                    </div>
-                                </div>
-                            </div>
-                            <Separator className="bg-white/10" />
-                            <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-2xl bg-white shadow-xl flex items-center justify-center">
-                                    <Building className="h-6 w-6 text-indigo-600" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Assigned_Unit</span>
-                                    <span className="text-sm font-black italic tracking-tighter">Backend Core Engineering</span>
-                                </div>
-                            </div>
-                        </div>
                     </Card>
                 </div>
             </div>
@@ -418,9 +390,9 @@ export default function InternDetail() {
                                 <ShieldCheck className="h-6 w-6" />
                             </div>
                             <div className="flex flex-col text-left">
-                                <DialogTitle className="text-2xl font-black tracking-tighter italic">Credential Audit</DialogTitle>
+                                <DialogTitle className="text-2xl font-black tracking-tighter italic">Xét duyệt tài liệu</DialogTitle>
                                 <DialogDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">
-                                    Authenticating resource: {selectedDoc?.type}
+                                    Xác thực tài liệu: {selectedDoc?.type}
                                 </DialogDescription>
                             </div>
                         </div>
@@ -428,28 +400,28 @@ export default function InternDetail() {
 
                     <div className="p-10 space-y-8">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1 italic">Audit Decision *</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1 italic">Quyết định *</label>
                             <Select onValueChange={(val) => setDecision(val)} value={decision}>
                                 <SelectTrigger className="h-14 rounded-2xl border-none bg-slate-100/50 shadow-inner font-black text-slate-900 focus:ring-primary/20 text-xs">
-                                    <SelectValue placeholder="Select verification verdict..." />
+                                    <SelectValue placeholder="Chọn kết quả xét duyệt..." />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-2xl border-none shadow-2xl p-2 bg-white">
                                     <SelectItem value="APPROVE" className="font-black text-[10px] uppercase tracking-widest text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700 py-4 rounded-xl">
-                                        <div className="flex items-center gap-3"><CheckCircle2 className="h-4 w-4" /> Credentials Authenticated</div>
+                                        <div className="flex items-center gap-3"><CheckCircle2 className="h-4 w-4" /> Phê duyệt tài liệu</div>
                                     </SelectItem>
                                     <SelectItem value="REJECT" className="font-black text-[10px] uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-700 py-4 rounded-xl">
-                                        <div className="flex items-center gap-3"><XCircle className="h-4 w-4" /> Certification Rejected</div>
+                                        <div className="flex items-center gap-3"><XCircle className="h-4 w-4" /> Từ chối tài liệu</div>
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1 italic">Audit Observations</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1 italic">Lý do / Ghi chú {decision === 'REJECT' ? '*' : ''}</label>
                             <Textarea
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
-                                placeholder="Formal observations or reasons for rejection..."
+                                placeholder={decision === 'REJECT' ? "Nhập chi tiết lý do từ chối (bắt buộc)..." : "Nhập ghi chú phê duyệt (tùy chọn)..."}
                                 className="min-h-[140px] rounded-[2rem] border-none bg-slate-100/50 shadow-inner font-bold text-sm italic focus:ring-primary/20 p-6"
                             />
                         </div>
@@ -461,14 +433,14 @@ export default function InternDetail() {
                             onClick={() => setVerifyModal(false)}
                             className="flex-1 h-14 rounded-2xl font-black text-[11px] uppercase tracking-widest text-slate-400 hover:bg-slate-50"
                         >
-                            Cancel Audit
+                            Hủy bỏ
                         </Button>
                         <Button
                             onClick={handleVerify}
-                            disabled={!decision}
+                            disabled={!decision || (decision === 'REJECT' && !note.trim())}
                             className="flex-[2] h-14 rounded-2xl bg-slate-900 hover:bg-black font-black text-[11px] uppercase tracking-widest text-white shadow-2xl shadow-slate-200 transition-all active:scale-95 disabled:opacity-50"
                         >
-                            Commit Decisions
+                            Xác nhận
                         </Button>
                     </DialogFooter>
                 </DialogContent>

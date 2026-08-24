@@ -89,18 +89,18 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
-import { useThemeStore } from '../../shared/store/theme';
-import BaseButton from '../../shared/components/BaseButton.vue';
-import BaseInput from '../../shared/components/BaseInput.vue';
-import BaseSelect from '../../shared/components/BaseSelect.vue';
-import BaseCard from '../../shared/components/BaseCard.vue';
-import BaseBadge from '../../shared/components/BaseBadge.vue';
-import BaseChip from '../../shared/components/BaseChip.vue';
-import BaseAvatar from '../../shared/components/BaseAvatar.vue';
-import BaseTable from '../../shared/components/BaseTable.vue';
-import BasePagination from '../../shared/components/BasePagination.vue';
-import SearchToolbar from '../../shared/components/SearchToolbar.vue';
-import FilterPanel from '../../shared/components/FilterPanel.vue';
+import { useThemeStore } from '@/shared/store/theme';
+import BaseButton from '@/shared/components/BaseButton.vue';
+import BaseInput from '@/shared/components/BaseInput.vue';
+import BaseSelect from '@/shared/components/BaseSelect.vue';
+import BaseCard from '@/shared/components/BaseCard.vue';
+import BaseBadge from '@/shared/components/BaseBadge.vue';
+import BaseChip from '@/shared/components/BaseChip.vue';
+import BaseAvatar from '@/shared/components/BaseAvatar.vue';
+import BaseTable from '@/shared/components/BaseTable.vue';
+import BasePagination from '@/shared/components/BasePagination.vue';
+import SearchToolbar from '@/shared/components/SearchToolbar.vue';
+import FilterPanel from '@/shared/components/FilterPanel.vue';
 
 const themeStore = useThemeStore();
 

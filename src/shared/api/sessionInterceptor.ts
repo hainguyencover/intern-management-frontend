@@ -37,6 +37,17 @@ export function registerSessionInterceptor(client: AxiosInstance): void {
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      // Xóa Content-Type cố định nếu payload là FormData để Axios tự sinh boundary multipart
+      if (config.data instanceof FormData && config.headers) {
+        delete config.headers['Content-Type'];
+        delete config.headers['content-type'];
+        if (typeof config.headers.delete === 'function') {
+          config.headers.delete('Content-Type');
+          config.headers.delete('content-type');
+        }
+      }
+
       return config;
     },
     (error) => Promise.reject(error)
@@ -48,8 +59,17 @@ export function registerSessionInterceptor(client: AxiosInstance): void {
     async (error: AxiosError) => {
       const { config, response } = error;
 
-      // Retry Policy: chỉ retry 401, tối đa 1 lần
-      if (response?.status !== 401 || !config || (config as any)._retry) {
+      const requestUrl = config?.url || '';
+
+      // Retry Policy: chỉ retry 401 cho API nghiệp vụ, không retry cho /auth/login, /auth/me, /auth/refresh
+      if (
+        response?.status !== 401 ||
+        !config ||
+        (config as any)._retry ||
+        requestUrl.includes('/auth/login') ||
+        requestUrl.includes('/auth/me') ||
+        requestUrl.includes('/auth/refresh')
+      ) {
         return Promise.reject(error);
       }
 

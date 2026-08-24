@@ -1,32 +1,93 @@
-export type EvaluationStatus = 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
+export type EvaluationStatus = 'DRAFT' | 'SUBMITTED' | 'HR_REVIEWING' | 'RETURNED' | 'APPROVED' | 'LOCKED';
 
-export interface EvaluationCriterion {
-  id: string;
-  name: string;
+export interface EvaluationItem {
+  id: number;
+  criterionId: number;
+  criterionName: string;
   category: 'TECHNICAL' | 'SOFT_SKILL' | 'ATTENDANCE' | 'LEARNING';
-  weight: number; // e.g., 0.4 = 40%
-  score: number;  // 1 - 10
+  score: number;
+  comment?: string;
+  weight: number;
+  maxScore: number;
+  displayOrder: number;
 }
 
-export interface Evaluation {
-  id: string;
-  internId: string;
+export interface EvaluationDetail {
+  id: number;
+  internId: number;
   internName: string;
-  mentorId: string;
+  studentCode: string;
+  mentorId: number;
   mentorName: string;
+  programId?: number;
+  programName?: string;
+  templateId?: number;
+  templateName?: string;
   period: string;
   status: EvaluationStatus;
-  criteria: EvaluationCriterion[];
-  weightedScore: number;
-  grade: 'A' | 'B' | 'C' | 'D' | 'F';
-  passFail: 'PASS' | 'FAIL';
-  feedback?: string;
+  overallScore?: number;
+  classification?: string;
+  overallComment?: string;
+  items: EvaluationItem[];
+  taskCompletion?: number;
+  attendanceRate?: number;
   createdAt: string;
+  submittedAt?: string;
+  approvedAt?: string;
+  lockedAt?: string;
+  returnedAt?: string;
+  returnReason?: string;
 }
 
-export interface CreateEvaluationPayload {
-  internId: string;
+export interface PendingEvaluation {
+  internId: number;
+  internName: string;
+  studentCode: string;
+  programName?: string;
+  taskCompletion: number;
+  attendanceRate: number;
+  evaluationStatus: string;
+  draftEvaluationId?: number;
+}
+
+export interface CreateDraftPayload {
+  internId: number;
+  templateId: number;
   period: string;
-  criteria: { id: string; score: number }[];
-  feedback?: string;
+}
+
+export interface UpdateDraftPayload {
+  criteria: { criterionId: number; score: number; comment?: string }[];
+  overallComment?: string;
+}
+
+export interface FinalReportDetail {
+  id: number;
+  reportNumber: string;
+  internId: number;
+  internName: string;
+  studentCode: string;
+  email: string;
+  mentorId?: number;
+  mentorName?: string;
+  programId?: number;
+  programName?: string;
+  status: string;
+  evaluationScore: number;
+  taskScore: number;
+  attendanceScore: number;
+  weeklyReportScore: number;
+  finalScore: number;
+  classification: string;
+  taskTotal: number;
+  taskCompleted: number;
+  taskCompletionRate: number;
+  attendanceTotal: number;
+  attendancePresent: number;
+  attendanceRate: number;
+  mentorComment?: string;
+  hrComment?: string;
+  returnReason?: string;
+  generatedAt?: string;
+  approvedAt?: string;
 }

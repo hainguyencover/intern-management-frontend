@@ -1,11 +1,13 @@
 <template>
-  <div class="row justify-center q-py-md">
+  <div class="row justify-center q-py-sm">
     <q-pagination
       :model-value="modelValue"
       :max="max"
       :disabled="disabled"
-      input
+      dense
+      size="md"
       color="primary"
+      direction-links
       boundary-links
       @update:model-value="(val) => $emit('update:modelValue', val)"
     />

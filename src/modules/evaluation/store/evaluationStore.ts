@@ -25,17 +25,20 @@ export const useEvaluationStore = defineStore('evaluation', {
           limit: query?.limit || this.limit,
           status: query?.status !== undefined ? query.status : this.statusFilter
         });
-        this.items = res.content;
-        this.totalElements = res.totalElements;
-        this.totalPages = res.totalPages;
-        this.page = res.page;
-        this.limit = res.limit;
+        const rawContent = res?.content ?? (res as any)?.data?.content ?? (Array.isArray(res) ? res : []);
+        this.items = Array.isArray(rawContent) ? rawContent : [];
+        this.totalElements = res?.totalElements ?? (res as any)?.data?.totalElements ?? this.items.length;
+        this.totalPages = res?.totalPages ?? (res as any)?.data?.totalPages ?? 1;
+        this.page = res?.page ?? (res as any)?.data?.page ?? 1;
+        this.limit = res?.limit ?? (res as any)?.data?.size ?? 10;
       } catch (err: any) {
         this.error = err?.message || 'Không thể tải danh sách bài đánh giá.';
+        this.items = [];
       } finally {
         this.loading = false;
       }
     },
+
 
     setStatusFilter(status: EvaluationStatus | ''): void {
       this.statusFilter = status;

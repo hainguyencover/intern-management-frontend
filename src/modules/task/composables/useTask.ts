@@ -18,7 +18,8 @@ export function useTask() {
   // Task form fields
   const formTitle = ref('');
   const formDescription = ref('');
-  const formAssigneeId = ref('');
+  const formAssigneeId = ref<string | number>('');
+
   const formDueDate = ref('');
   const formPriority = ref<TaskPriority>('MEDIUM');
   const titleError = ref<string | undefined>(undefined);
@@ -39,7 +40,8 @@ export function useTask() {
   function openCreateTaskModal() {
     formTitle.value = '';
     formDescription.value = '';
-    formAssigneeId.value = 'intern-1';
+    formAssigneeId.value = 1;
+
     formDueDate.value = '2026-02-28';
     formPriority.value = 'MEDIUM';
     titleError.value = undefined;

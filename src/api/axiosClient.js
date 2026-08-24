@@ -105,9 +105,10 @@ function handleLogout() {
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
     // Only redirect if not already on login page to avoid loops
-    if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
+    if (!window.location.pathname.includes("/auth/login")) {
+        window.location.href = "/auth/login";
     }
 }
+
 
 export default axiosClient;

@@ -11,5 +11,18 @@ export const authRoutes: RouteRecordRaw[] = [
     name: 'login',
     component: () => import('./pages/LoginPage.vue'),
     meta: { guestOnly: true }
+  },
+  {
+    path: 'register',
+    alias: ['/register'],
+    name: 'register',
+    component: () => import('./pages/RegisterPage.vue'),
+    meta: { guestOnly: true }
+  },
+  {
+    path: 'verify-email',
+    alias: ['/verify-email'],
+    name: 'verify-email',
+    component: () => import('./pages/VerifyEmailPage.vue')
   }
 ];

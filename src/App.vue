@@ -1,8 +1,6 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <AppSplash v-if="authStore.status === AuthStatus.INITIALIZING" />
-    <router-view v-else />
-  </q-layout>
+  <AppSplash v-if="authStore.status === AuthStatus.INITIALIZING" />
+  <router-view v-else />
 </template>
 
 <script setup lang="ts">

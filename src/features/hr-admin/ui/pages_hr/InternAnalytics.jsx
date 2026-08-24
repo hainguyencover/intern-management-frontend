@@ -1,219 +1,369 @@
 import React, { useEffect, useState } from "react";
-import aiApi from "@/api/aiApi";
+import analyticsApi from "@/api/analyticsApi";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
     BarChart3,
     TrendingUp,
     Users,
     UserCheck,
-    FileText,
-    Brain,
-    AlertCircle,
     CheckCircle2,
-    Zap,
-    Globe,
-    Cpu,
+    Calendar,
+    Filter,
+    RotateCcw,
+    GraduationCap,
+    BookOpen,
+    PieChart,
     ArrowUpRight,
     Search,
-    LayoutDashboard
+    Globe
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export default function InternAnalytics() {
-    const [data, setData] = useState(null);
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [aiInsights, setAiInsights] = useState({});
+
+    // Filters state
+    const [filters, setFilters] = useState({
+        fromDate: "",
+        toDate: "",
+        university: "",
+        major: ""
+    });
+
+    // Applied filter state for API requests
+    const [appliedFilters, setAppliedFilters] = useState({});
+
+    // Analytics data state
+    const [overview, setOverview] = useState(null);
+    const [schoolStats, setSchoolStats] = useState([]);
+    const [majorStats, setMajorStats] = useState([]);
+    const [completionStats, setCompletionStats] = useState(null);
+
+    const fetchAllAnalytics = async (params) => {
+        try {
+            setLoading(true);
+            const [overviewRes, schoolRes, majorRes, completionRes] = await Promise.all([
+                analyticsApi.getOverview(params),
+                analyticsApi.getBySchool(params),
+                analyticsApi.getByMajor(params),
+                analyticsApi.getCompletion(params)
+            ]);
+
+            setOverview(overviewRes.data?.data || overviewRes.data);
+            setSchoolStats(schoolRes.data?.data || schoolRes.data || []);
+            setMajorStats(majorRes.data?.data || majorRes.data || []);
+            setCompletionStats(completionRes.data?.data || completionRes.data);
+        } catch (err) {
+            console.error("Failed to fetch analytics", err);
+            toast.error("Không thể tải dữ liệu thống kê báo cáo");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchAnalytics = async () => {
-            try {
-                setLoading(true);
-                const res = await aiApi.getAnalytics();
-                const analyticsData = res.data;
-                setData(analyticsData);
-                
-                // Parse AI Insights JSON if it's a string
-                if (typeof analyticsData.aiInsights === 'string') {
-                    try {
-                        // Extract JSON from potential markdown code blocks
-                        const jsonStr = analyticsData.aiInsights.replace(/```json|```/g, "").trim();
-                        setAiInsights(JSON.parse(jsonStr));
-                    } catch (e) {
-                        console.error("Failed to parse AI insights JSON", e);
-                        setAiInsights({ 
-                            performanceForecast: analyticsData.aiInsights,
-                            topSkills: "Error parsing skills",
-                            bottleneckAlert: "N/A",
-                            aiEfficiencyScore: "95%"
-                        });
-                    }
-                }
-            } catch (err) {
-                toast.error("Không thể tải dữ liệu phân tích");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchAnalytics();
-    }, []);
+        fetchAllAnalytics(appliedFilters);
+    }, [appliedFilters]);
 
-    if (loading) {
+    const handleApplyFilters = () => {
+        if (filters.fromDate && filters.toDate && filters.fromDate > filters.toDate) {
+            toast.error("Từ ngày phải nhỏ hơn hoặc bằng Đến ngày");
+            return;
+        }
+        setAppliedFilters({ ...filters });
+    };
+
+    const handleResetFilters = () => {
+        const reset = { fromDate: "", toDate: "", university: "", major: "" };
+        setFilters(reset);
+        setAppliedFilters(reset);
+    };
+
+    const handleDrillDownSchool = (schoolName) => {
+        navigate(`/hr/interns?university=${encodeURIComponent(schoolName)}`);
+    };
+
+    const handleDrillDownMajor = (majorName) => {
+        navigate(`/hr/interns?major=${encodeURIComponent(majorName)}`);
+    };
+
+    if (loading && !overview) {
         return (
-            <div className="p-20 flex flex-col items-center justify-center space-y-4">
-                <div className="h-16 w-16 rounded-full border-4 border-slate-100 border-t-primary animate-spin" />
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Processing Big Data Matrices...</p>
+            <div className="p-12 space-y-6">
+                <div className="h-10 w-64 bg-slate-200 animate-pulse rounded-lg" />
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-28 bg-slate-100 animate-pulse rounded-2xl" />
+                    ))}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="h-80 bg-slate-100 animate-pulse rounded-3xl" />
+                    <div className="h-80 bg-slate-100 animate-pulse rounded-3xl" />
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="p-8 pb-32 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {/* Top Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="space-y-1">
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tighter flex items-center gap-4">
-                        HR Intelligence Center
-                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="p-8 pb-32 space-y-8 animate-in fade-in duration-700">
+            {/* Top Bar Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                        <BarChart3 className="h-8 w-8 text-primary" /> Báo Cáo & Thống Kê HR
+                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
                     </h1>
-                    <p className="text-slate-400 font-bold text-sm flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-primary opacity-50" /> Predictive performance modelling and ecosystem health metrics.
+                    <p className="text-slate-500 font-medium text-sm mt-1">
+                        Phân tích nguồn ứng viên (US-032) và đo lường tỷ lệ hoàn thành chương trình (US-033).
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Button variant="outline" className="h-11 px-5 rounded-2xl border-slate-200 bg-white font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-50">
-                        Export Report
-                    </Button>
-                    <Button className="h-11 px-6 rounded-2xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-slate-900/10">
-                        <Zap className="mr-2 h-4 w-4 text-amber-400 fill-amber-400" /> Live AI Refresh
-                    </Button>
-                </div>
+                <Badge variant="outline" className="px-4 py-2 border-slate-200 bg-white font-bold text-xs text-slate-600 rounded-xl shadow-sm">
+                    <Globe className="h-4 w-4 mr-2 text-primary" /> Live Multi-Tenant Analytics
+                </Badge>
             </div>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                    { label: "Active Interns", value: data.stats.totalInterns, icon: Users, color: "text-blue-500", bg: "bg-blue-50" },
-                    { label: "Elite Mentors", value: data.stats.totalMentors, icon: UserCheck, color: "text-emerald-500", bg: "bg-emerald-50" },
-                    { label: "Pipeline Apps", value: data.stats.pendingApplications, icon: FileText, color: "text-amber-500", bg: "bg-amber-50" },
-                    { label: "AI Confidence", value: aiInsights.aiEfficiencyScore || "98%", icon: Cpu, color: "text-purple-500", bg: "bg-purple-50" }
-                ].map((stat, i) => (
-                    <Card key={i} className="border-none shadow-sm hover:shadow-xl transition-all duration-500 bg-white/70 backdrop-blur-md border border-white/20 glass animate-scale-in group cursor-default h-32 flex items-center" style={{ animationDelay: `${i * 100}ms` }}>
-                        <CardContent className="p-6 w-full flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                                <p className="text-3xl font-black text-slate-900 tracking-tighter group-hover:scale-105 transition-transform origin-left">{stat.value}</p>
-                            </div>
-                            <div className={`h-14 w-14 rounded-2xl ${stat.bg} flex items-center justify-center transition-transform group-hover:rotate-12`}>
-                                <stat.icon className={`h-7 w-7 ${stat.color}`} />
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            {/* Main Insights Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* AI Predictive Insights */}
-                <Card className="lg:col-span-8 border-none shadow-2xl shadow-slate-200/50 bg-white/80 backdrop-blur-lg border border-white/30 glass-dark text-slate-900 overflow-hidden rounded-[2.5rem] animate-fade-in" style={{ animationDelay: '400ms' }}>
-                    <CardHeader className="p-8 pb-0">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <CardTitle className="text-xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
-                                    <Brain className="h-6 w-6 text-primary" /> AI Strategic Prediction
-                                </CardTitle>
-                                <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Neural Network Regression Analysis</CardDescription>
-                            </div>
-                            <Badge variant="neutral" className="bg-emerald-50 text-emerald-600 font-black text-[9px] uppercase px-3 py-1 border-none tracking-widest">
-                                Analysis Valid
-                            </Badge>
+            {/* Filter Section */}
+            <Card className="border-slate-200 shadow-sm bg-white rounded-2xl">
+                <CardContent className="p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                                Từ ngày (From Date)
+                            </label>
+                            <input
+                                type="date"
+                                value={filters.fromDate}
+                                onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
+                                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+                            />
                         </div>
-                    </CardHeader>
-                    <CardContent className="p-8 space-y-8">
-                        <div className="p-8 rounded-[2rem] bg-slate-50 border border-slate-100 flex flex-col items-center gap-6 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4">
-                                <TrendingUp className="h-12 w-12 text-slate-200 opacity-20" />
-                            </div>
-                            <p className="text-lg font-bold text-slate-600 leading-relaxed text-center z-10 italic">
-                                "{aiInsights.performanceForecast || "The current intern ecosystem shows a strong upward trend in technical proficiency..."}"
-                            </p>
-                             <div className="flex gap-4 mt-4">
-                                <Badge className="bg-white text-slate-900 border-slate-200 text-[9px] font-black uppercase px-4 py-2 rounded-xl">Target: Backend</Badge>
-                                <Badge className="bg-white text-slate-900 border-slate-200 text-[9px] font-black uppercase px-4 py-2 rounded-xl">Quality: Senior-Track</Badge>
-                            </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                                Đến ngày (To Date)
+                            </label>
+                            <input
+                                type="date"
+                                value={filters.toDate}
+                                onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
+                                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+                            />
                         </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                                Trường (University)
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Lọc theo tên trường..."
+                                value={filters.university}
+                                onChange={(e) => setFilters({ ...filters, university: e.target.value })}
+                                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                                Ngành (Major)
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Lọc theo chuyên ngành..."
+                                value={filters.major}
+                                onChange={(e) => setFilters({ ...filters, major: e.target.value })}
+                                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+                            />
+                        </div>
+                    </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                                    <AlertCircle className="h-3 w-3 text-amber-500" /> Critical Bottlenecks
-                                </h3>
-                                <div className="p-6 rounded-3xl bg-amber-50/50 border border-amber-100">
-                                    <p className="text-[11px] font-bold text-amber-900 leading-relaxed uppercase tracking-tight">
-                                        {aiInsights.bottleneckAlert || "No immediate shortages detected in the mentorship matrix."}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                                    <CheckCircle2 className="h-3 w-3 text-emerald-500" /> High-Priority Skills
-                                </h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {(aiInsights.topSkills || "Java,Spring Boot,React,AI,RAG").split(',').map((skill, i) => (
-                                        <Badge key={i} className="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9px] uppercase px-4 py-2 border-none rounded-xl tracking-widest shadow-lg shadow-emerald-500/20">
-                                            {skill.trim()}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
+                    <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
+                        <Button
+                            variant="outline"
+                            onClick={handleResetFilters}
+                            className="h-10 px-4 rounded-xl text-slate-600 font-bold text-xs"
+                        >
+                            <RotateCcw className="mr-2 h-3.5 w-3.5" /> Đặt lại (Reset)
+                        </Button>
+                        <Button
+                            onClick={handleApplyFilters}
+                            className="h-10 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md"
+                        >
+                            <Filter className="mr-2 h-3.5 w-3.5" /> Áp dụng bộ lọc
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* KPI Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <Card className="border-slate-200 shadow-sm bg-white rounded-2xl hover:border-slate-300 transition-all">
+                    <CardContent className="p-5 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tổng thực tập sinh</p>
+                            <p className="text-3xl font-black text-slate-900 mt-1">{overview?.totalInterns ?? 0}</p>
+                        </div>
+                        <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <Users className="h-6 w-6" />
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* Ecosystem Health */}
-                <Card className="lg:col-span-4 border-none shadow-2xl shadow-slate-200/50 bg-slate-900 text-white overflow-hidden rounded-[2.5rem]">
-                    <CardHeader className="p-8">
-                        <CardTitle className="text-xl font-black flex items-center gap-3 tracking-tight">
-                            <LayoutDashboard className="h-6 w-6 text-primary" /> Ecosystem Pulse
+                <Card className="border-slate-200 shadow-sm bg-white rounded-2xl hover:border-slate-300 transition-all">
+                    <CardContent className="p-5 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">TTS Tham Gia Kỳ</p>
+                            <p className="text-3xl font-black text-slate-900 mt-1">{overview?.participatingInterns ?? 0}</p>
+                        </div>
+                        <div className="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <UserCheck className="h-6 w-6" />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-slate-200 shadow-sm bg-white rounded-2xl hover:border-slate-300 transition-all">
+                    <CardContent className="p-5 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Đã Hoàn Thành</p>
+                            <p className="text-3xl font-black text-emerald-600 mt-1">{overview?.completedInterns ?? 0}</p>
+                        </div>
+                        <div className="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <CheckCircle2 className="h-6 w-6" />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-slate-200 shadow-sm bg-white rounded-2xl hover:border-slate-300 transition-all">
+                    <CardContent className="p-5 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tỷ lệ hoàn thành (US-033)</p>
+                            <p className="text-3xl font-black text-purple-600 mt-1">{overview?.completionRate ?? 0}%</p>
+                        </div>
+                        <div className="h-12 w-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                            <TrendingUp className="h-6 w-6" />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* US-032: Analytics Charts & Breakdowns */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* School / University Statistics */}
+                <Card className="border-slate-200 shadow-sm bg-white rounded-2xl">
+                    <CardHeader className="p-6 pb-2">
+                        <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <GraduationCap className="h-5 w-5 text-primary" /> Thống kê theo Trường (US-032)
                         </CardTitle>
-                        <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Real-time engagement metrics</CardDescription>
+                        <CardDescription className="text-xs text-slate-500">
+                            Phân tích nguồn ứng viên thực tập theo trường đào tạo. Click vào trường để xem danh sách.
+                        </CardDescription>
                     </CardHeader>
-                    <CardContent className="p-8 space-y-10">
-                        {[
-                            { label: "Technical Progress", value: 84, color: "bg-primary" },
-                            { label: "Mentor Satisfaction", value: 92, color: "bg-emerald-400" },
-                            { label: "Churn Probability", value: 7, color: "bg-rose-400" },
-                            { label: "AI Integration", value: 99, color: "bg-blue-400" }
-                        ].map((pulse, i) => (
-                            <div key={i} className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{pulse.label}</span>
-                                    <span className="text-sm font-black italic">{pulse.value}%</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                                    <div 
-                                        className={`h-full ${pulse.color} transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(255,255,255,0.2)]`}
-                                        style={{ width: `${pulse.value}%` }}
-                                    />
-                                </div>
+                    <CardContent className="p-6 pt-4 space-y-4">
+                        {schoolStats.length === 0 ? (
+                            <div className="py-12 text-center text-slate-400 font-medium text-sm">
+                                Không có dữ liệu trong khoảng thời gian đã chọn.
                             </div>
-                        ))}
+                        ) : (
+                            schoolStats.map((school, i) => (
+                                <div
+                                    key={i}
+                                    onClick={() => handleDrillDownSchool(school.schoolName)}
+                                    className="p-3 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group space-y-2 border border-transparent hover:border-slate-200"
+                                >
+                                    <div className="flex items-center justify-between text-sm font-bold text-slate-800">
+                                        <span className="flex items-center gap-2 group-hover:text-primary transition-colors">
+                                            {school.schoolName}
+                                            <ArrowUpRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </span>
+                                        <span className="text-slate-600">{school.count} TTS ({school.percentage}%)</span>
+                                    </div>
+                                    <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-primary rounded-full transition-all duration-500"
+                                            style={{ width: `${Math.max(school.percentage, 2)}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </CardContent>
+                </Card>
 
-                        <div className="pt-8 border-t border-white/10">
-                            <div className="flex items-center gap-4 p-5 rounded-3xl bg-white/5 border border-white/10 group cursor-pointer hover:bg-white/10 transition-all">
-                                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-                                    <ArrowUpRight className="h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-black uppercase tracking-widest">Growth Matrix</p>
-                                    <p className="text-[9px] font-bold opacity-40">View long-term trajectory</p>
-                                </div>
+                {/* Major Statistics */}
+                <Card className="border-slate-200 shadow-sm bg-white rounded-2xl">
+                    <CardHeader className="p-6 pb-2">
+                        <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-indigo-600" /> Thống kê theo Ngành (US-032)
+                        </CardTitle>
+                        <CardDescription className="text-xs text-slate-500">
+                            Phân tích nguồn ứng viên theo chuyên ngành đào tạo. Click vào ngành để xem danh sách.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6 pt-4 space-y-4">
+                        {majorStats.length === 0 ? (
+                            <div className="py-12 text-center text-slate-400 font-medium text-sm">
+                                Không có dữ liệu trong khoảng thời gian đã chọn.
                             </div>
-                        </div>
+                        ) : (
+                            majorStats.map((major, i) => (
+                                <div
+                                    key={i}
+                                    onClick={() => handleDrillDownMajor(major.majorName)}
+                                    className="p-3 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group space-y-2 border border-transparent hover:border-slate-200"
+                                >
+                                    <div className="flex items-center justify-between text-sm font-bold text-slate-800">
+                                        <span className="flex items-center gap-2 group-hover:text-indigo-600 transition-colors">
+                                            {major.majorName}
+                                            <ArrowUpRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </span>
+                                        <span className="text-slate-600">{major.count} TTS ({major.percentage}%)</span>
+                                    </div>
+                                    <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                                            style={{ width: `${Math.max(major.percentage, 2)}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </CardContent>
                 </Card>
             </div>
+
+            {/* US-033: Completion Rate Detail */}
+            <Card className="border-slate-200 shadow-sm bg-white rounded-2xl">
+                <CardHeader className="p-6 pb-2">
+                    <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <PieChart className="h-5 w-5 text-purple-600" /> Tỷ Lệ Hoàn Thành Chương Trình Thực Tập (US-033)
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-500">
+                        Đánh giá chất lượng thực tập dựa trên tỷ lệ thực tập sinh hoàn thành chương trình.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                        <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-2">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mẫu số (Participating)</p>
+                            <p className="text-3xl font-black text-slate-900">{completionStats?.totalParticipating ?? 0}</p>
+                            <p className="text-xs text-slate-500">Gồm TTS đang thực tập + đã hoàn thành</p>
+                        </div>
+
+                        <div className="p-6 rounded-2xl bg-emerald-50/60 border border-emerald-100 text-center space-y-2">
+                            <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Đã hoàn thành</p>
+                            <p className="text-3xl font-black text-emerald-700">{completionStats?.completed ?? 0}</p>
+                            <p className="text-xs text-emerald-600 font-medium">Hồ sơ đã đạt tiêu chí tốt nghiệp kỳ</p>
+                        </div>
+
+                        <div className="p-6 rounded-2xl bg-purple-50/60 border border-purple-100 text-center space-y-2">
+                            <p className="text-xs font-bold text-purple-600 uppercase tracking-wider">Completion Rate</p>
+                            <p className="text-4xl font-black text-purple-700">{completionStats?.completionRate ?? 0}%</p>
+                            <p className="text-xs text-purple-600 font-medium">Công thức: Completed / Participating × 100</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

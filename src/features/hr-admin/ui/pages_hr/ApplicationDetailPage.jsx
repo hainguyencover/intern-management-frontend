@@ -61,7 +61,8 @@ export default function ApplicationDetailPage() {
             );
             await fetchData();
         } catch (err) {
-            toast.error(err.response?.data?.message || "Có lỗi xảy ra");
+            const errorMsg = err.response?.data?.error?.message || err.response?.data?.message || "Có lỗi xảy ra";
+            toast.error(errorMsg);
         }
     };
 

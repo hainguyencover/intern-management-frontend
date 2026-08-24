@@ -13,4 +13,5 @@ export const hrUpdateProgram = (id, payload) =>
     axiosClient.put(`/api/v1/hr/programs/${id}`, payload).then((r) => r.data);
 
 export const hrPublishProgram = (id) =>
-    axiosClient.put(`/api/hr/programs/${id}/publish`).then((r) => r.data);
+    axiosClient.put(`/api/v1/hr/programs/${id}/publish`).then((r) => r.data);
+

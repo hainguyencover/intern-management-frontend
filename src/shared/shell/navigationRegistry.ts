@@ -17,7 +17,7 @@ export class NavigationRegistry {
     // Sort by order if specified
     allMenus.sort((a, b) => (a.order || 99) - (b.order || 99));
 
-    // Filter by Permission & Feature Flags
+    // Filter by Permission, Roles & Feature Flags
     return allMenus.filter((item) => {
       if (item.featureFlag && !featureFlags.isEnabled(item.featureFlag)) {
         return false;
@@ -27,6 +27,10 @@ export class NavigationRegistry {
       }
       if (item.role && !permissionService.hasRole(item.role)) {
         return false;
+      }
+      if (item.roles && item.roles.length > 0) {
+        const hasMatchingRole = item.roles.some((r) => permissionService.hasRole(r));
+        if (!hasMatchingRole) return false;
       }
       return true;
     });

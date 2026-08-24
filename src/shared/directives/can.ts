@@ -1,22 +1,28 @@
 import type { Directive, DirectiveBinding } from 'vue';
-import { useAuthStore } from '../../modules/auth/store/authStore';
+import { useAuthStore } from '@/stores/auth.store';
 
 export const vCan: Directive = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
-    const authStore = useAuthStore();
-    const value = binding.value;
-
-    if (!value) return;
-
-    let hasAccess = false;
-    if (Array.isArray(value)) {
-      hasAccess = value.some((perm) => authStore.permissions.includes(perm));
-    } else if (typeof value === 'string') {
-      hasAccess = authStore.permissions.includes(value);
-    }
-
-    if (!hasAccess) {
-      el.parentNode?.removeChild(el);
-    }
+    checkPermission(el, binding);
+  },
+  updated(el: HTMLElement, binding: DirectiveBinding) {
+    checkPermission(el, binding);
   }
 };
+
+function checkPermission(el: HTMLElement, binding: DirectiveBinding) {
+  const authStore = useAuthStore();
+  const value = binding.value;
+
+  if (!value) return;
+
+  const hasAccess = authStore.hasPermission(value);
+
+  if (!hasAccess) {
+    if (el.parentNode) {
+      el.parentNode.removeChild(el);
+    } else {
+      el.style.display = 'none';
+    }
+  }
+}

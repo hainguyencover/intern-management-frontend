@@ -41,7 +41,7 @@ export default function Sidebar() {
         const isHr = roles.includes("HR");
         const isMentor = roles.includes("MENTOR");
         const isIntern = roles.includes("INTERN");
-        const isApprovedIntern = isIntern && ['APPROVED', 'CONTRACT_SENT', 'CONTRACT_SIGNED'].includes(user?.applicationStatus);
+        const isApprovedIntern = isIntern && (!user?.applicationStatus || ['APPROVED', 'CONTRACT_SENT', 'CONTRACT_SIGNED', 'INTERNING', 'COMPLETED'].includes(user?.applicationStatus));
 
         const sections = [];
 

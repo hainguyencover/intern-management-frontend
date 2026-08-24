@@ -4,6 +4,8 @@ import * as authService from '../services/authService';
 import * as sessionManager from '../services/sessionManager';
 import { AuthEvent, AuthStatus } from '../constants/authEvents';
 
+let initPromise: Promise<void> | null = null;
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     status: AuthStatus.INITIALIZING as AuthStatus,
@@ -23,22 +25,31 @@ export const useAuthStore = defineStore('auth', {
      * Khởi tạo và khôi phục phiên tự động khi ứng dụng bootstrap (F5).
      */
     async initializeAuth(): Promise<void> {
-      this.status = AuthStatus.INITIALIZING;
-      try {
-        const user = await authService.getProfile();
-        this.user = user;
-        this.roles = user.roles;
-        this.permissions = user.permissions;
-        this.authenticated = true;
-        this.status = AuthStatus.AUTHENTICATED;
-        this.lastActivity = Date.now();
-      } catch (error) {
-        this.user = null;
-        this.roles = [];
-        this.permissions = [];
-        this.authenticated = false;
-        this.status = AuthStatus.UNAUTHENTICATED;
-      }
+      if (this.status === AuthStatus.AUTHENTICATED) return;
+      if (initPromise) return initPromise;
+
+      initPromise = (async () => {
+        this.status = AuthStatus.INITIALIZING;
+        try {
+          const user = await authService.getProfile();
+          this.user = user;
+          this.roles = user.roles || [];
+          this.permissions = user.permissions || [];
+          this.authenticated = true;
+          this.status = AuthStatus.AUTHENTICATED;
+          this.lastActivity = Date.now();
+        } catch (error) {
+          this.user = null;
+          this.roles = [];
+          this.permissions = [];
+          this.authenticated = false;
+          this.status = AuthStatus.UNAUTHENTICATED;
+        } finally {
+          initPromise = null;
+        }
+      })();
+
+      return initPromise;
     },
 
     /**
@@ -49,8 +60,8 @@ export const useAuthStore = defineStore('auth', {
       try {
         const user = await authService.login(payload);
         this.user = user;
-        this.roles = user.roles;
-        this.permissions = user.permissions;
+        this.roles = user.roles || [];
+        this.permissions = user.permissions || [];
         this.authenticated = true;
         this.status = AuthStatus.AUTHENTICATED;
         this.lastActivity = Date.now();
@@ -59,6 +70,43 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false;
       }
+    },
+
+    /**
+     * Đăng ký tài khoản ứng viên.
+     */
+    async register(payload: import('../models/auth').RegisterRequest): Promise<void> {
+      this.loading = true;
+      try {
+        const user = await authService.register(payload);
+        this.user = user;
+        this.roles = user.roles || [];
+        this.permissions = user.permissions || [];
+        this.authenticated = true;
+        this.status = AuthStatus.AUTHENTICATED;
+        this.lastActivity = Date.now();
+
+        sessionManager.broadcastEvent(AuthEvent.LOGIN_SUCCESS);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    /**
+     * Xác thực email với token.
+     */
+    async verifyEmail(token: string): Promise<void> {
+      await authService.verifyEmail(token);
+      if (this.user) {
+        this.user.emailVerified = true;
+      }
+    },
+
+    /**
+     * Yêu cầu gửi lại email xác thực.
+     */
+    async resendVerification(email: string): Promise<void> {
+      await authService.resendVerification(email);
     },
 
     /**

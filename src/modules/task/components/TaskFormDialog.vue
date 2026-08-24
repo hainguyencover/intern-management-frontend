@@ -39,7 +39,7 @@ defineProps<{
   modelValue: boolean;
   title: string;
   description: string;
-  assigneeId: string;
+  assigneeId: string | number;
   dueDate: string;
   priority: TaskPriority;
   loading: boolean;
@@ -51,9 +51,10 @@ defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
   (e: 'update:title', value: string): void;
   (e: 'update:description', value: string): void;
-  (e: 'update:assigneeId', value: string): void;
+  (e: 'update:assigneeId', value: string | number): void;
   (e: 'update:dueDate', value: string): void;
   (e: 'update:priority', value: TaskPriority): void;
   (e: 'save'): void;
 }>();
+
 </script>

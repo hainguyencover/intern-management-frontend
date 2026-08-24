@@ -5,18 +5,20 @@
   >
     <template #header-actions>
       <BaseButton
+        v-if="isIntern"
         icon="event_note"
         color="secondary"
         label="Nộp báo cáo ngày"
         @click="openDailyReportModal"
       />
       <BaseButton
+        v-if="isStaff"
         icon="add_task"
         color="primary"
         label="Giao nhiệm vụ"
-        v-can="'task:create'"
         @click="openCreateTaskModal"
       />
+
     </template>
 
     <template #toolbar>
@@ -39,10 +41,22 @@
         :loading="loading"
         selectable
       >
+        <template #body-cell-status="props">
+          <q-td :props="props">
+            <q-chip
+              dense
+              :color="getTaskStatusColor(props.value)"
+              text-color="white"
+              size="sm"
+            >
+              {{ props.value || 'OPEN' }}
+            </q-chip>
+          </q-td>
+        </template>
         <template #body-cell-actions="props">
           <q-td :props="props" class="q-gutter-x-xs">
             <q-btn flat round dense icon="visibility" color="primary" @click="openTaskDetail(props.row)" />
-            <q-btn flat round dense icon="check_circle" color="positive" @click="handleStatusChange(props.row, 'DONE')" />
+            <q-btn v-if="isStaff && props.row.status !== 'DONE'" flat round dense icon="check_circle" color="positive" @click="handleStatusChange(props.row, 'DONE')" />
           </q-td>
         </template>
       </BaseDataTable>
@@ -105,6 +119,11 @@ import TaskDetailDrawer from '../components/TaskDetailDrawer.vue';
 import DailyReportModal from '../components/DailyReportModal.vue';
 import { useTask } from '../composables/useTask';
 import type { DataTableColumn } from '../../../shared/components/table/tableTypes';
+import { usePermission } from '../../../shared/composables/usePermission';
+
+const { hasRole } = usePermission();
+const isIntern = computed(() => hasRole('INTERN'));
+const isStaff = computed(() => hasRole('HR') || hasRole('ADMIN') || hasRole('MENTOR'));
 
 const {
   items,
@@ -157,6 +176,16 @@ const activeChips = computed(() => {
   }
   return chips;
 });
+
+function getTaskStatusColor(status: string) {
+  switch (status) {
+    case 'DONE':
+    case 'COMPLETED': return 'positive';
+    case 'IN_PROGRESS': return 'cyan-8';
+    case 'CANCELLED': return 'grey';
+    default: return 'primary';
+  }
+}
 
 function onRemoveFilter(key: string) {
   if (key === 'status') {
